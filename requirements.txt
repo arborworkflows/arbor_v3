@@ -1,0 +1,4 @@
+aiofiles
+fastapi
+pandas
+uvicorn

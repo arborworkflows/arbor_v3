@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>Sensor Trait Explorer</title>
+</head>
+
+<body>
+  <div id="app">
+    <v-app>
+      <v-navigation-drawer app>
+
+        <v-card class="pa-4 ma-4">
+          <div>Left Day</div>
+          <v-slider class="pt-12" dense :min="12" :max="64" thumb-label="always" v-model="selectedDayLeft"></v-slider>
+        </v-card>
+
+        <v-card class="pa-4 ma-4">
+          <div>Left Trait</div>
+          <v-list dense>
+            <v-list-item-group v-model="selectedTraitIndexLeft">
+              <v-list-item v-for="(trait, i) in traits" :key="i">
+                <v-list-item-content>
+                  <v-list-item-title v-text="trait"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+        </v-card>
+
+        <v-card class="pa-4 ma-4">
+          <div>Right Day</div>
+          <v-slider class="pt-12" dense :min="12" :max="64" thumb-label="always" v-model="selectedDayRight"></v-slider>
+        </v-card>
+        
+        <v-card class="pa-4 ma-4">
+          <div>Right Trait</div>
+          <v-list dense>
+            <v-list-item-group v-model="selectedTraitIndexRight">
+              <v-list-item v-for="(trait, i) in traits" :key="i">
+                <v-list-item-content>
+                  <v-list-item-title v-text="trait"></v-list-item-title>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+        </v-card>
+
+      </v-navigation-drawer>
+
+      <v-app-bar app>
+        Sensor Trait Explorer
+      </v-app-bar>
+
+      <v-main>
+        <v-container fluid>
+          <v-row>
+            <v-col cols="4">
+              <div ref="visLeft"></div>
+            </v-col>
+            <v-col cols="4">
+              <div ref="visRight"></div>
+            </v-col>
+          </v-row>
+          
+        </v-container>
+      </v-main>
+
+      <v-footer app>
+      </v-footer>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+      data: () => {
+        return {
+          traits: [
+            'canopy_height',
+            'leaf_angle_mean',
+            'leaf_angle_alpha',
+            'leaf_angle_beta',
+            'leaf_angle_chi',
+            'single_xgboost',
+            'abserror_single_xgboost',
+            'single_dtree',
+            'abserror_single_dtree',
+          ],
+          selectedTraitIndexLeft: 0,
+          selectedTraitLeft: 'canopy_height',
+          selectedDayLeft: 12,
+          selectedTraitIndexRight: 0,
+          selectedTraitRight: 'canopy_height',
+          selectedDayRight: 12,
+          plotData: '',
+        };
+      },
+      watch: {
+        selectedTraitIndexLeft() {
+          this.selectedTrait = this.traits[this.selectedTraitIndexLeft];
+          this.updatePlotLeft();
+        },
+        selectedDayLeft() {
+          this.updatePlotLeft();
+        },
+        selectedTraitIndexRight() {
+          this.selectedTrait = this.traits[this.selectedTraitIndexRight];
+          this.updatePlotRight();
+        },
+        selectedDayRight() {
+          this.updatePlotRight();
+        },
+      },
+      mounted() {
+        this.updatePlotLeft();
+        this.updatePlotRight();
+      },
+      methods: {
+        updatePlotLeft: _.debounce(function () {
+          vegaEmbed(this.$refs.visLeft, this.vegaLiteSpec(this.selectedTraitLeft, this.selectedDayLeft));
+        }, 1000),
+
+        updatePlotRight: _.debounce(function () {
+          vegaEmbed(this.$refs.visRight, this.vegaLiteSpec(this.selectedTraitRight, this.selectedDayRight));
+        }, 1000),
+
+        vegaLiteSpec(trait, day) {
+          var url = `/api/terra_trait_daily/?selectedTrait=${trait}&selectedDay=${day}`;
+          return {
+            description: 'trait values across the field',
+            data: { url, format: { type: 'csv' } },
+            mark: { type: 'rect', tooltip: { content: 'data' } },
+            encoding: {
+              x: { field: 'column', type: 'ordinal' },
+              y: { field: 'range', type: 'ordinal' },
+              color: { field: trait, type: 'quantitative' }
+            }
+          };
+        },
+      }
+    });
+  </script>
+</body>
+
+</html>
