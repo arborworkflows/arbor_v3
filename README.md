@@ -23,7 +23,7 @@ pip install -r requirements.txt
 
 Run
 ```
-uvicorn main:app
+uvicorn main:app --reload
 ```
 
 Visit [localhost:8000](http://localhost:8000)
