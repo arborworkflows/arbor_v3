@@ -1,15 +1,15 @@
-# Terra Analytics
+# Arbor Version 3
 
 ## Docker
 
 Build container
 ```
-docker build . -t terra-analytics
+docker build . -t arbor_v3
 ```
 
 Run
 ```
-docker run -p 9000:80 terra-analytics
+docker run -p 9000:80 arbor_v3
 ```
 
 Visit [localhost:9000](http://localhost:9000)
