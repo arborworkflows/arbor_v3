@@ -2,3 +2,4 @@ aiofiles
 fastapi
 pandas
 uvicorn
+rpy2

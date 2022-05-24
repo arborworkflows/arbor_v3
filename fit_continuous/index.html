@@ -1,5 +1,17 @@
-<template>
-  <v-app>
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>Fit Continuous</title>
+</head>
+
+<body>  
+  <div id="app">
+    <v-app>
     <v-layout class="transform-view" row fill-height>
       <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
         <v-toolbar dark flat color="primary">
@@ -127,22 +139,16 @@
       </v-layout>
     </v-layout>
   </v-app>
-</template>
+  </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
 
 <script>
-import { utils } from '@girder/components/src';
-import { csvParse } from 'd3-dsv';
-import scratchFolder from '../scratchFolder';
-import pollUntilJobComplete from '../pollUntilJobComplete';
-import optionsToParameters from '../optionsToParameters';
-import JsonDataTable from '../components/JsonDataTable';
-
-export default {
-  name: 'fitContinuous',
-  inject: ['girderRest'],
-  components: {
-    JsonDataTable,
-  },
+  new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
   data: () => ({
     tableFile: {},
     table: [],
@@ -183,27 +189,7 @@ export default {
     async run() {
       this.running = true;
       this.errorLog = null;
-      const resultSummaryItem = (await this.girderRest.post(
-        `item?folderId=${this.scratchFolder._id}&name=result`,
-      )).data
-      const plotItem = (await this.girderRest.post(
-        `item?folderId=${this.scratchFolder._id}&name=result`,
-      )).data
-
-      const params = optionsToParameters({
-        tableFileId: this.tableFile._id,
-        treeFileId: this.treeFile._id,
-        selectedColumn: this.selectedColumn,
-	model: this.selectedModel,
-	stdError: this.stdError,
-        resultSummaryItemId: resultSummaryItem._id,
-        plotItemId: plotItem._id,
-      });
-      this.job = (await this.girderRest.post(
-        `arbor_nova/fitcontinuous?${params}`,
-      )).data;
-
-      await pollUntilJobComplete(this.girderRest, this.job, job => this.job = job);
+ 
 
       if (this.job.status === 3) {
         this.running = false;
@@ -274,5 +260,7 @@ export default {
     },
 
   }
-}
+})
 </script>
+</body>
+</html>
