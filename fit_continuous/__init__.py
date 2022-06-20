@@ -1,8 +1,13 @@
 from fastapi import Response
+from fastapi import Request
 import pandas as pd
 from tempfile import NamedTemporaryFile
+from fit_continuous.methods import table_upload
 import rpy2
 from rpy2 import robjects
+import json
+# use pandas to store CSV files
+import pandas as pd
 
 #from methods import testRInterface
 
@@ -11,6 +16,54 @@ def testRInterface():
     r('''
     print('howdy from R')
     ''')
+
+
+def store_the_table(table):
+    print('table upload method')
+    #print('recveived table:',table)
+    print('recevied a table with ',len(table['table']),'rows')
+    # we might be able to save and use the JSON data directly, but 
+    # we know the R methods can read files, so lets write out the file
+    table_df = pd.DataFrame(table['table'])
+    # write out the data as a known filename we will use in R
+    table_df.to_csv("/tmp/table_file.csv",index=False)
+
+
+def store_the_tree(tree):
+    print('tree upload method')
+    # get the tree string from the json object
+    treeString = tree['tree']
+    # we might be able to save and use the  data directly, but 
+    # we know the R methods can read files, so lets write out the file
+    with open("/tmp/tree_file.phy", mode = "w") as f:
+        f.write(treeString)
+
+def run(params):
+    # pull the arguments from the JSON object
+    column = params['column']
+    model = params['model']
+    stdError = params['stdError']
+    # now that we have all the data collected, run the R method 
+    r = robjects.r
+    env = robjects.globalenv
+    env['tree_file'] = '/tmp/tree_file.phy'
+    env['table_file'] = '/tmp/table_file.csv'
+    env['correlation'] = correlation
+    env['column'] = column
+    env['model'] = model
+    env['stdError'] = stdError
+    env['modelfit_summary_file'] = '/tmp/modelfile.csv'
+    env['plot_file'] = '/tmp/plotfile.svg'
+    r('''
+#require(ape)
+#require(nlme)
+#tree <- read.tree(tree_file)
+#table <- read.csv(table_file, check.names = TRUE)
+print('execute fit continuous method')
+
+    ''')
+    print('** need to collect result from R here')
+    return 'amazing algorithm result content'
 
 
 def init(app):
@@ -27,13 +80,15 @@ def init(app):
 
 
     # we still need:
-    # 1. read the tree and store in backend file system (/tmp)
-    # 2. read the table and (ditto)
-    # 3. Attach a method to the Go button  that calls R on the tree and table
+    # 1. read the tree and store in backend file system (/tmp) (*DONE)
+    # 2. read the table and (ditto) (*DONE)
+    # 2.5 init R: ape, geiger, phytools, aRbor? 
+    # 3. Attach a method to the Go button  that calls R on the tree and table (*DONE)
     # 3.5 (Kristen) build a 
     # 4. reformat output to make a pretty picture (probaly return JSON )
     # 5. in Javascript, make a Vega chart(s) 
 
+    # this is the method that generates the single page for the app
     @app.get('/fit_continuous')
     def index():
         with open('fit_continuous/index.html') as indexFile:
@@ -41,3 +96,38 @@ def init(app):
         
         testRInterface()
         return Response(content=indexContent, media_type='text/html')
+
+    # upload a CSV table to the server for use later
+    @app.post('/fit_continuous/table_upload')
+    async def table_upload(table : Request):
+        json_table =  await table.json()
+        print('received uploaded table:',json_table)
+        #tableobj = json.loads(json_info)
+        #print('decoded to object:',tableobj)
+        store_the_table(json_table)
+        returnContent = '<p>success</p>'
+        return Response(content=returnContent, media_type='text/html')
+
+    # upload a tree file in PHY format for use later
+    @app.post('/fit_continuous/tree_upload')
+    async def tree_upload(tree : Request):
+        tree_obj =  await tree.json()
+        print('received uploaded tree:',tree_obj['tree'])
+        #tableobj = json.loads(json_info)
+        #print('decoded to object:',tableobj)
+        store_the_tree(tree_obj)
+        returnContent = '<p>success</p>'
+        return Response(content=returnContent, media_type='text/html')
+
+    # run the method on the previously uploaded tree and table 
+    @app.post('/fit_continuous/run')
+    async def run(params : Request):
+        params_obj =  await params.json()
+        print('run with column:',params_obj['column'])
+        print('run with model',params_obj['model'])
+        print('run with stdError:',params_obj['stdError'])
+        result = run(params_obj)
+        returnContent = 'result'
+        return Response(content=returnContent, media_type='text/html')  
+
+

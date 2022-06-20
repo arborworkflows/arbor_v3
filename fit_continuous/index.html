@@ -5,6 +5,7 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.js" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <title>Fit Continuous</title>
 </head>
@@ -144,11 +145,19 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script>
+
+//import JsonDataTable from '../components/JsonDataTable.vue';
+//app.component('json-data-table', MyComponent)
+
+
+
   new Vue({
       el: '#app',
       vuetify: new Vuetify(),
+
   data: () => ({
     tableFile: {},
     table: [],
@@ -165,6 +174,7 @@
     result: [],
     resultColumns: [],
     plotUrl: '',
+    
   }),
   asyncComputed: {
     scratchFolder() {
@@ -186,43 +196,121 @@
 
   },
   methods: {
+
+    // thanks to: https://thegermancoder.com/2018/11/29/how-to-parse-csv-with-javascript/
+    CSVToArray(strData) {
+      let lines = strData.split(/(?:\r\n|\n)+/).filter(function(el) {return el.length != 0});
+      let headers = lines.splice(0, 1)[0].split(",");
+      let valuesRegExp = /(?:\"([^\"]*(?:\"\"[^\"]*)*)\")|([^\",]+)/g;
+      let elements = [];
+      for (let i = 0; i < lines.length; i++) {
+          let element = {};
+          let j = 0;
+          while (matches = valuesRegExp.exec(lines[i])) {
+              var value = matches[1] || matches[2];
+              value = value.replace(/\"\"/g, "\"");
+              element[headers[j]] = value;
+              j++;
+          }
+          elements.push(element);
+      }
+      return elements
+    },
+
     async run() {
       this.running = true;
       this.errorLog = null;
- 
 
-      if (this.job.status === 3) {
-        this.running = false;
-        this.result = csvParse((await this.girderRest.get(`item/${resultSummaryItem._id}/download`)).data);
-        this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
-        this.plotUrl = `${this.girderRest.apiRoot}/item/${plotItem._id}/download`;
-      }
-      if (this.job.status === 4) {
-        this.running = false;
-      }
+      jQuery.ajax({
+              url: '/fit_continuous/run',
+              type: "POST",
+              contentType: 'application/json',
+              data: JSON.stringify({
+                column: this.selectedColumn,
+                model: this.selectedModel,
+                stdError: this.stdError
+              }),
+              success: function(data){
+                console.log('success!!')
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+              }
+          });
     },
+
+
+
     async uploadTable(file) {
+      console.log('uploadTable in fit_continuous was called')
+
       if (file) {
         this.tableFileName = file.name;
-        const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder}); 
-        this.tableFile = await uploader.start();
         const reader = new FileReader();
         reader.addEventListener('loadend', e => {
           const text = e.srcElement.result;
-          this.table = csvParse(text);
-          this.columns = csvParse(text).columns;
+          this.table = this.CSVToArray(text);
+          console.log('Read table file content!!');
+          // get the column names of the data table by examining the first entry
+          this.columns = Object.keys(this.table[0])
+          // wrap data as a form (HTML 5 standard)
+          //let formData = new FormData();
+          //formData.append('file', this.table);
+          // upload to server for computation
+
+          jQuery.ajax({
+              url: '/fit_continuous/table_upload',
+              type: "POST",
+              contentType: 'application/json',
+              data: JSON.stringify({
+                table: this.table
+              }),
+              success: function(data){
+                console.log('success!!')
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+              }
+          });
         });
-        reader.readAsText(file);
+        reader.readAsText(file);   
       }
-    },
-    async uploadTree(file) {
-      if (file) {
-        this.treeFileName = file.name;
-        const uploader = new utils.Upload(file, {$rest: this.girderRest,  parent: this.scratchFolder});
-        this.treeFile = await uploader.start();
-      }
+
     },
 
+  
+    async uploadTree(file) {
+      console.log('uploadTree in fit_continuous')
+
+      if (file) {
+        this.treeFileName = file.name;
+        const reader = new FileReader();
+        reader.addEventListener('loadend', e => {
+          const text = e.srcElement.result;
+          this.tree = text;
+          console.log('Read tree file content!!');
+         
+
+          jQuery.ajax({
+              url: '/fit_continuous/tree_upload',
+              type: "POST",
+              //processData: false,
+              contentType: 'application/json',
+              data: JSON.stringify({
+                tree: this.tree
+              }),
+              success: function(data){
+                console.log('success!!')
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+              }
+          });
+        });
+        reader.readAsText(file);   
+      }
+    },
+  
 
     async downloadResults() {
 	// iterate through the first row to find the column names
