@@ -6,3 +6,7 @@ def testRInterface():
     r('''
     print('howdy from R')
     ''')
+
+
+def table_upload():
+    print('table upload method')

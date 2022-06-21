@@ -5,7 +5,7 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.js" rel="stylesheet">
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.js" rel="stylesheet">  -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <title>Fit Continuous</title>
 </head>
@@ -251,6 +251,19 @@
           const text = e.srcElement.result;
           this.table = this.CSVToArray(text);
           console.log('Read table file content!!');
+          // there might be an empty column for the taxon name (R convention), so
+          // try to catch and fix it here
+          // Kristen: help ....
+          // for (let i = 0; i < Object.keys(this.table[0]).length; i++) {
+          //    prop = Object.keys(this.table[0])[i]
+          //    if (prop.length == 0) then {
+          //     this.columns.put('name')
+          //    } else {
+          //     this.columns.put(prop)
+          //    }
+          //    console.log(prop)
+          // }
+
           // get the column names of the data table by examining the first entry
           this.columns = Object.keys(this.table[0])
           // wrap data as a form (HTML 5 standard)

@@ -1,3 +1,5 @@
+
+
 #FROM r-base
 FROM ubuntu:20.04
 
@@ -23,7 +25,9 @@ RUN apt-get install -qy r-base
 RUN apt-get install -qy r-base-core
 RUN apt-get install -qy r-recommended
 
-
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("ape")'
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("phytools")'
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("geiger")'
 #RUN apt install software-properties-common
 
 #RUN apt add-apt-repository ppa:c2d4u.team/c2d4u4.0+

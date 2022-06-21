@@ -38,28 +38,29 @@ def store_the_tree(tree):
     with open("/tmp/tree_file.phy", mode = "w") as f:
         f.write(treeString)
 
-def run(params):
+def run_method(params):
     # pull the arguments from the JSON object
+    print(   'got to the run method'   )
     column = params['column']
     model = params['model']
     stdError = params['stdError']
+    print('RUN METHOD: params were',column,model,stdError)
     # now that we have all the data collected, run the R method 
     r = robjects.r
     env = robjects.globalenv
     env['tree_file'] = '/tmp/tree_file.phy'
     env['table_file'] = '/tmp/table_file.csv'
-    env['correlation'] = correlation
     env['column'] = column
     env['model'] = model
     env['stdError'] = stdError
     env['modelfit_summary_file'] = '/tmp/modelfile.csv'
     env['plot_file'] = '/tmp/plotfile.svg'
     r('''
-#require(ape)
-#require(nlme)
-#tree <- read.tree(tree_file)
-#table <- read.csv(table_file, check.names = TRUE)
-print('execute fit continuous method')
+require(ape)
+require(geiger)
+tree <- read.tree(tree_file)
+table <- read.csv(table_file, check.names = TRUE)
+print('R is ready to execute the fit continuous method')
 
     ''')
     print('** need to collect result from R here')
@@ -126,8 +127,8 @@ def init(app):
         print('run with column:',params_obj['column'])
         print('run with model',params_obj['model'])
         print('run with stdError:',params_obj['stdError'])
-        result = run(params_obj)
-        returnContent = 'result'
-        return Response(content=returnContent, media_type='text/html')  
+        returnContent =  run_method(params_obj)
+        return Response(content=returnContent, media_type='text/html')
+        #return await Response(content=json.dumps(run(params_obj)),media_type='text/html') 
 
 
