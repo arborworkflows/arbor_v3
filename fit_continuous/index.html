@@ -152,6 +152,9 @@
 //import JsonDataTable from '../components/JsonDataTable.vue';
 //app.component('json-data-table', MyComponent)
 
+//import { csvParse } from 'd3-dsv';
+//  this.result = csvParse((await this.girderRest.get(`item/${resultSummaryItem._id}/download`)).data);
+//this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
 
 
   new Vue({
@@ -231,7 +234,7 @@
                 stdError: this.stdError
               }),
               success: function(data){
-                console.log('success!!')
+                console.log('content resturned:',data)
               },
               error: function(data){
                 alert( 'Sorry.' );
@@ -266,11 +269,8 @@
 
           // get the column names of the data table by examining the first entry
           this.columns = Object.keys(this.table[0])
-          // wrap data as a form (HTML 5 standard)
-          //let formData = new FormData();
-          //formData.append('file', this.table);
-          // upload to server for computation
 
+          // pass the table data to the server backend
           jQuery.ajax({
               url: '/fit_continuous/table_upload',
               type: "POST",
@@ -279,7 +279,7 @@
                 table: this.table
               }),
               success: function(data){
-                console.log('success!!')
+                console.log(data)
               },
               error: function(data){
                 alert( 'Sorry.' );
@@ -303,7 +303,7 @@
           this.tree = text;
           console.log('Read tree file content!!');
          
-
+          // pass the tree file as a string to the server
           jQuery.ajax({
               url: '/fit_continuous/tree_upload',
               type: "POST",
@@ -348,7 +348,7 @@
         //console.log(csvOutput);
 	//csvOutput = JSON.stringify(csvOutput)
 	console.log(csvOutput.split(0,50))
-        const url = window.URL.createObjectURL(new Blob([csvOutput]));
+  const url = window.URL.createObjectURL(new Blob([csvOutput]));
 	console.log("url:",url)
 	// this is an old but still normal way to download a file, attach it to an 
 	// <a> tag and click the link.  We then remove the tag after downloaing. 
