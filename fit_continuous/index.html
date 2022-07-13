@@ -113,30 +113,33 @@
           </v-card>
           <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
             <v-card-text>{{ tableFileName }}</v-card-text>
-            <json-data-table :data="table" />
+           <!--  <json-data-table :data="table" /> -->
           </v-card>
-        <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+        <div v-if="runCompleted" xs12 class="text-xs-center mb-4 ml-4 mr-4">
           Running (Job Status {{ job.status }}) ...
-        </div>
-        <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
-        <template v-if="!running && job.status === 3">
 
-	  <v-card class ="mb-4 ml-4 mr-4">
-	    <v-card-text>
-		<b>Maximum-Likelihood Estimate:</b>
-		<br></br>
-		{{ this.result[0]["lnL"] }}
-	    </v-card-text>
-	  </v-card>
-          <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
-            <v-card-text>Result summary</v-card-text>
-            <json-data-table :data="result" hide-actions/>
-          </v-card>
-	  <v-card class ="mb-4 ml-4 mr-4">
-	     <v-card-text>Phenogram Plot</v-card-text>
-	     <img :src="plotUrl" style="display: block; margin: auto">
-	     </v-card>
-        </template>
+            
+       <!-- <template v-if="runCompleted">  -->
+
+            <v-card class ="mb-4 ml-4 mr-4">
+              <v-card-text>
+            <b>Maximum-Likelihood Estimate:</b>
+            <br></br>
+            lnL: {{ result.lnL }}
+            <br></br>
+            aic: {{ result.aic }}
+              </v-card-text>
+            </v-card>
+                  <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
+                    <v-card-text>Result summary</v-card-text>
+                      <table id="resultTable" class="display" width="100%"></table>
+                  </v-card>
+            <v-card class ="mb-4 ml-4 mr-4">
+              <v-card-text>Phenogram Plot</v-card-text>
+              <img :src="plotUrl" style="display: block; margin: auto">
+              </v-card>
+       <!-- </template> -->
+      </div>
       </v-layout>
     </v-layout>
   </v-app>
@@ -146,13 +149,14 @@
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/d3-dsv@3"></script>
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
 <script>
 
 //import JsonDataTable from '../components/JsonDataTable.vue';
 //app.component('json-data-table', MyComponent)
 
-//import { csvParse } from 'd3-dsv';
+// 
 //  this.result = csvParse((await this.girderRest.get(`item/${resultSummaryItem._id}/download`)).data);
 //this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
 
@@ -169,12 +173,14 @@
     treeFileName: '',
     job: { status: 0 },
     running: false,
+    runCompleted: false,
     columns: [],
     selectedColumn: null,
     models:['BM','OU','EB','rate_trend','lambda','kappa','delta','mean_trend','white'],
     selectedModel: '',
     stdError: '',
     result: [],
+    lnL: 0,
     resultColumns: [],
     plotUrl: '',
     
@@ -194,7 +200,7 @@
     },
 
     readyToDownload() {
-      return (this.result.length>0 && !this.running && this.job.status===3)
+      return (this.result && !this.running && this.runCompleted)
     },
 
   },
@@ -220,6 +226,8 @@
       return elements
     },
 
+
+
     async run() {
       this.running = true;
       this.errorLog = null;
@@ -233,15 +241,22 @@
                 model: this.selectedModel,
                 stdError: this.stdError
               }),
-              success: function(data){
-                console.log('content resturned:',data)
+              success: function(returnedData){
+                var dataAsJSON = JSON.parse(returnedData)
+                console.log('content returned:',dataAsJSON)
+                this.result = dataAsJSON
+                this.lnL = dataAsJSON["lnL"]
+                this.runCompleted = true
+                this.running = false
+             
               },
               error: function(data){
                 alert( 'Sorry.' );
+                this.runCompleted = true
+                this.running = false
               }
           });
     },
-
 
 
     async uploadTable(file) {
@@ -252,23 +267,9 @@
         const reader = new FileReader();
         reader.addEventListener('loadend', e => {
           const text = e.srcElement.result;
-          this.table = this.CSVToArray(text);
-          console.log('Read table file content!!');
-          // there might be an empty column for the taxon name (R convention), so
-          // try to catch and fix it here
-          // Kristen: help ....
-          // for (let i = 0; i < Object.keys(this.table[0]).length; i++) {
-          //    prop = Object.keys(this.table[0])[i]
-          //    if (prop.length == 0) then {
-          //     this.columns.put('name')
-          //    } else {
-          //     this.columns.put(prop)
-          //    }
-          //    console.log(prop)
-          // }
-
-          // get the column names of the data table by examining the first entry
-          this.columns = Object.keys(this.table[0])
+          //this.table = this.CSVToArray(text);
+          this.table = d3.csvParse(text)
+          this.columns = this.table.columns
 
           // pass the table data to the server backend
           jQuery.ajax({

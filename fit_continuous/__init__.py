@@ -14,7 +14,7 @@ import pandas as pd
 def store_the_table(table):
     print('table upload method')
     #print('recveived table:',table)
-    print('recevied a table with ',len(table['table']),'rows')
+    print('recevied a table with ',len(table['table']))
     # we might be able to save and use the JSON data directly, but
     # we know the R methods can read files, so lets write out the file
     table_df = pd.DataFrame(table['table'])
