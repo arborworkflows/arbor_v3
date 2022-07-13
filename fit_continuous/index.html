@@ -10,7 +10,7 @@
   <title>Fit Continuous</title>
 </head>
 
-<body>  
+<body>
   <div id="app">
     <v-app>
     <v-layout class="transform-view" row fill-height>
@@ -70,7 +70,7 @@
               :disabled="!readyToDownload"
               @click="downloadResults"
             >
-              Download Model Results 
+              Download Model Results
             </v-btn>
           </v-flex>
         </v-container>
@@ -84,14 +84,14 @@
               <br><br>
               1. Upload your table (.csv) and tree (Newick, .phy). Note: tables are assumed to have species names as row names.
               <br><br>
-              2. Select the desired column to run fitContinuous on. 
+              2. Select the desired column to run fitContinuous on.
               <br><br>
 	      3. Select the desired Model and input your standard error.
 	      <br>
 	      Models include:
 	      <br>
  	      <ul>
-		<li>BM (Brownian Motion)</li> 
+		<li>BM (Brownian Motion)</li>
 		<li>OU (Ornstein-Uhlenbeck)</li>
 		<li>EB (Early-Burst)</li>
 		<li>rate_trend (diffusion model with linear trend in rates through time)</li>
@@ -108,7 +108,7 @@
 	      Sources cited: Pagel M. 1999. Inferring the historical patterns of biological evolution. Nature 401: 877-884.
 	      <br>
 	      Pennel, M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
-             
+
 	    </v-card-text>
           </v-card>
           <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
@@ -177,7 +177,7 @@
     result: [],
     resultColumns: [],
     plotUrl: '',
-    
+
   }),
   asyncComputed: {
     scratchFolder() {
@@ -234,7 +234,7 @@
                 stdError: this.stdError
               }),
               success: function(data){
-                console.log('content resturned:',data)
+                console.log('content returned:',data)
               },
               error: function(data){
                 alert( 'Sorry.' );
@@ -286,12 +286,12 @@
               }
           });
         });
-        reader.readAsText(file);   
+        reader.readAsText(file);
       }
 
     },
 
-  
+
     async uploadTree(file) {
       console.log('uploadTree in fit_continuous')
 
@@ -302,7 +302,7 @@
           const text = e.srcElement.result;
           this.tree = text;
           console.log('Read tree file content!!');
-         
+
           // pass the tree file as a string to the server
           jQuery.ajax({
               url: '/fit_continuous/tree_upload',
@@ -320,38 +320,38 @@
               }
           });
         });
-        reader.readAsText(file);   
+        reader.readAsText(file);
       }
     },
-  
+
 
     async downloadResults() {
 	// iterate through the first row to find the column names
         var csvOutput = ''
 	for (var key in this.result[0]) {
 	  csvOutput += key+','
-	} 
+	}
         csvOutput += "\n";
 
         this.result.forEach(function(row) {
 		for (var key in row) {
     		// check if the property/key is defined in the object itself, not in parent
-    		if (row.hasOwnProperty(key)) {           
+    		if (row.hasOwnProperty(key)) {
         			//console.log(key, row[key]);
 				csvOutput += row[key]+','
     			}
 		}
             csvOutput += "\n";
         });
- 
+
 	// the csv seems to be created correctly
         //console.log(csvOutput);
 	//csvOutput = JSON.stringify(csvOutput)
 	console.log(csvOutput.split(0,50))
   const url = window.URL.createObjectURL(new Blob([csvOutput]));
 	console.log("url:",url)
-	// this is an old but still normal way to download a file, attach it to an 
-	// <a> tag and click the link.  We then remove the tag after downloaing. 
+	// this is an old but still normal way to download a file, attach it to an
+	// <a> tag and click the link.  We then remove the tag after downloaing.
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', 'model_results.csv') //or any other extension;

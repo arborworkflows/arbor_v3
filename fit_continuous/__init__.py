@@ -11,27 +11,6 @@ import json
 import pandas as pd
 
 
-def store_the_table(table):
-    print('table upload method')
-    #print('recveived table:',table)
-    print('recevied a table with ',len(table['table']),'rows')
-    # we might be able to save and use the JSON data directly, but
-    # we know the R methods can read files, so lets write out the file
-    table_df = pd.DataFrame(table['table'])
-    # write out the data as a known filename we will use in R
-    table_df.to_csv("/tmp/table_file.csv",index=False)
-
-
-def store_the_tree(tree):
-    print('tree upload method')
-    # get the tree string from the json object
-    treeString = tree['tree']
-    # we might be able to save and use the  data directly, but
-    # we know the R methods can read files, so lets write out the file
-    with open("/tmp/tree_file.phy", mode = "w") as f:
-        f.write(treeString)
-
-
 def init(app):
 
     # @app.get('/api/fit_continuous/')
