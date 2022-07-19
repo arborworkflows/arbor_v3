@@ -291,9 +291,21 @@ write.csv(pheno_df, pheno_connect_file, row.names = FALSE)
     result_as_dict = result_df.to_dict('records')
     print('result as dict:',result_as_dict)
 
+    # retreive the phenogram information from the R result
+    connections_df = pd.read_csv('/tmp/pheno_connections.csv')
+    points_df = pd.read_csv('/tmp/pheno_points.csv')
+    connections_json = connections_df.to_dict('records')
+    points_json = points_df.to_dict('records')
+    print(points_json)
+
+    # [{},{}]
+    # json:  {'data': []}
+
     # repack from pandas dataframe into a dictionary.
     # values are returned as a list of one dictionary, so pick the first list entry
     result = {}
+    result['points'] = points_json
+    result['connections'] = connections_json
     for key in result_as_dict[0].keys():
         result[key] = result_as_dict[0][key]
 

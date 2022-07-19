@@ -86,40 +86,35 @@
               <br><br>
               2. Select the desired column to run fitContinuous on. 
               <br><br>
-	      3. Select the desired Model and input your standard error.
-	      <br>
-	      Models include:
-	      <br>
- 	      <ul>
-		<li>BM (Brownian Motion)</li> 
-		<li>OU (Ornstein-Uhlenbeck)</li>
-		<li>EB (Early-Burst)</li>
-		<li>rate_trend (diffusion model with linear trend in rates through time)</li>
-		<li>lambda (one of the Pagel (1999) models that fits the extent to which the phylogeny predicts covariance among trait values for species)</li>
-		<li>kappa (character divergence is related to the number of speciation events between two species)</li>
-		<li>delta (time-dependent model of trait evolution)</li>
-		<li>mean_trend (sensible only for non-ultrametric trees; directional drift/trend toward smaller or larger values through time)</li>
-		<li>white (white-noise)</li>
-	      </ul>
-	      <br>
-              4. Click GO.
+              3. Select the desired Model and input your standard error.
+              <br>
+              Models include:
+              <br>
+                <ul>
+                  <li>BM (Brownian Motion)</li> 
+                  <li>OU (Ornstein-Uhlenbeck)</li>
+                  <li>EB (Early-Burst)</li>
+                  <li>rate_trend (diffusion model with linear trend in rates through time)</li>
+                  <li>lambda (one of the Pagel (1999) models that fits the extent to which the phylogeny predicts covariance among trait values for species)</li>
+                  <li>kappa (character divergence is related to the number of speciation events between two species)</li>
+                  <li>delta (time-dependent model of trait evolution)</li>
+                  <li>mean_trend (sensible only for non-ultrametric trees; directional drift/trend toward smaller or larger values through time)</li>
+                  <li>white (white-noise)</li>
+                </ul>
+              <br>
+                    4. Click GO.
+                    <br><br>
               <br><br>
-	      <br><br>
-	      Sources cited: Pagel M. 1999. Inferring the historical patterns of biological evolution. Nature 401: 877-884.
-	      <br>
-	      Pennel, M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
-             
-	    </v-card-text>
+              Sources cited: Pagel M. 1999. Inferring the historical patterns of biological evolution. Nature 401: 877-884.
+              <br>
+              Pennel, M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
+                  
+            </v-card-text>
           </v-card>
-          <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
-            <v-card-text>{{ tableFileName }}</v-card-text>
-           <!--  <json-data-table :data="table" /> -->
-          </v-card>
-        <div v-if="runCompleted" xs12 class="text-xs-center mb-4 ml-4 mr-4">
-          Running (Job Status {{ job.status }}) ...
 
+        <div xs12 class="text-xs-center mb-4 ml-4 mr-4">
             
-       <!-- <template v-if="runCompleted">  -->
+          <!-- <template v-if="runCompleted">  -->
 
             <v-card class ="mb-4 ml-4 mr-4">
               <v-card-text>
@@ -136,10 +131,10 @@
                   </v-card>
             <v-card class ="mb-4 ml-4 mr-4">
               <v-card-text>Phenogram Plot</v-card-text>
-              <img :src="plotUrl" style="display: block; margin: auto">
+              <div ref="phenogram"></div>
               </v-card>
-       <!-- </template> -->
-      </div>
+          <!-- </template> -->
+        </div>
       </v-layout>
     </v-layout>
   </v-app>
@@ -147,11 +142,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.21.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.2"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-dsv@3"></script>
-    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-<script>
+
+
+    <script>
 
 //import JsonDataTable from '../components/JsonDataTable.vue';
 //app.component('json-data-table', MyComponent)
@@ -183,6 +182,7 @@
     lnL: 0,
     resultColumns: [],
     plotUrl: '',
+
     
   }),
   asyncComputed: {
@@ -231,6 +231,8 @@
     async run() {
       this.running = true;
       this.errorLog = null;
+      // we need to do this because 'this' becomes undefined inside the callback
+      var that = this
 
       jQuery.ajax({
               url: '/fit_continuous/run',
@@ -241,19 +243,23 @@
                 model: this.selectedModel,
                 stdError: this.stdError
               }),
-              success: function(returnedData){
+              success: function(returnedData) {
                 var dataAsJSON = JSON.parse(returnedData)
                 console.log('content returned:',dataAsJSON)
-                this.result = dataAsJSON
-                this.lnL = dataAsJSON["lnL"]
-                this.runCompleted = true
-                this.running = false
+                // use the temporay that we initialized above 
+                that.result = dataAsJSON
+                that.lnL = dataAsJSON["lnL"]
+                that.runCompleted = true
+                // Kristen: other variables here
+                that.running = false
+                that.renderTheSpec(that)
              
               },
               error: function(data){
                 alert( 'Sorry.' );
                 this.runCompleted = true
                 this.running = false
+
               }
           });
     },
@@ -289,7 +295,6 @@
         });
         reader.readAsText(file);   
       }
-
     },
 
   
@@ -322,33 +327,70 @@
           });
         });
         reader.readAsText(file);   
-      }
+      };
     },
   
+    async renderTheSpec(that) {
+
+      var spec = { 
+
+          title: "Fit continuous Result",
+          width: 800,
+          height: 800,
+          layer: [
+            {data: {values: that.result.points, format:{type: "json"}}, 
+            params: [{
+              name: "grid",
+              select: "interval",
+              bind: "scales"
+            }],
+            mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
+            encoding: {
+              x: {field: "pheno_xx", type: "quantitative"},
+              y: {field: "pheno_yy", type: "quantitative"},
+              }
+            },
+            {data: {values: that.result.connections, format:{type: "json"}}, 
+            mark: {type:"rule", fill: "#4C78A8", strokeWidth:0.4, tooltip: {content: "data"}},
+            encoding: {
+              x: {field: "V1_x", type: "quantitative"},
+              x2: {field: "V2_x", type: "quantitative"},
+              y: {field: "V1_y", type: "quantitative"},
+              y2: {field: "V2_y", type: "quantitative"},
+              }
+            }
+          ]
+          };
+  
+          vegaEmbed(that.$refs.phenogram, spec);
+        }, 
+
+ 
 
     async downloadResults() {
-	// iterate through the first row to find the column names
-        var csvOutput = ''
-	for (var key in this.result[0]) {
-	  csvOutput += key+','
-	} 
-        csvOutput += "\n";
+      console.log('trying to buld csv and download')
+	    // iterate through the first row to find the column names
+      var csvOutput = ''
 
-        this.result.forEach(function(row) {
-		for (var key in row) {
-    		// check if the property/key is defined in the object itself, not in parent
-    		if (row.hasOwnProperty(key)) {           
-        			//console.log(key, row[key]);
-				csvOutput += row[key]+','
-    			}
-		}
-            csvOutput += "\n";
-        });
+      for (var key in this.result) {
+          if ((key != 'points') && (key != 'connections')) {
+          csvOutput += key+','
+          }
+      } 
+      csvOutput += "\n";
+
+      for (const key in this.result) {
+        if ((key != 'points') && (key != 'connections')) {
+          csvOutput += result[key]+','
+        }
+      }
+      csvOutput += "\n";
+
  
 	// the csv seems to be created correctly
         //console.log(csvOutput);
 	//csvOutput = JSON.stringify(csvOutput)
-	console.log(csvOutput.split(0,50))
+	console.log(csvOutput)
   const url = window.URL.createObjectURL(new Blob([csvOutput]));
 	console.log("url:",url)
 	// this is an old but still normal way to download a file, attach it to an 
