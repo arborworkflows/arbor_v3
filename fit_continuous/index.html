@@ -10,7 +10,7 @@
   <title>Fit Continuous</title>
 </head>
 
-<body>  
+<body>
   <div id="app">
     <v-app>
     <v-layout class="transform-view" row fill-height>
@@ -70,7 +70,7 @@
               :disabled="!readyToDownload"
               @click="downloadResults"
             >
-              Download Model Results 
+              Download Model Results
             </v-btn>
           </v-flex>
         </v-container>
@@ -84,14 +84,14 @@
               <br><br>
               1. Upload your table (.csv) and tree (Newick, .phy). Note: tables are assumed to have species names as row names.
               <br><br>
-              2. Select the desired column to run fitContinuous on. 
+              2. Select the desired column to run fitContinuous on.
               <br><br>
               3. Select the desired Model and input your standard error.
               <br>
               Models include:
               <br>
                 <ul>
-                  <li>BM (Brownian Motion)</li> 
+                  <li>BM (Brownian Motion)</li>
                   <li>OU (Ornstein-Uhlenbeck)</li>
                   <li>EB (Early-Burst)</li>
                   <li>rate_trend (diffusion model with linear trend in rates through time)</li>
@@ -108,12 +108,12 @@
               Sources cited: Pagel M. 1999. Inferring the historical patterns of biological evolution. Nature 401: 877-884.
               <br>
               Pennel, M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
-                  
+
             </v-card-text>
           </v-card>
 
         <div xs12 class="text-xs-center mb-4 ml-4 mr-4">
-            
+
           <!-- <template v-if="runCompleted">  -->
 
             <v-card class ="mb-4 ml-4 mr-4">
@@ -155,7 +155,7 @@
 //import JsonDataTable from '../components/JsonDataTable.vue';
 //app.component('json-data-table', MyComponent)
 
-// 
+//
 //  this.result = csvParse((await this.girderRest.get(`item/${resultSummaryItem._id}/download`)).data);
 //this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
 
@@ -183,7 +183,7 @@
     resultColumns: [],
     plotUrl: '',
 
-    
+
   }),
   asyncComputed: {
     scratchFolder() {
@@ -246,14 +246,14 @@
               success: function(returnedData) {
                 var dataAsJSON = JSON.parse(returnedData)
                 console.log('content returned:',dataAsJSON)
-                // use the temporay that we initialized above 
+                // use the temporay that we initialized above
                 that.result = dataAsJSON
                 that.lnL = dataAsJSON["lnL"]
                 that.runCompleted = true
                 // Kristen: other variables here
                 that.running = false
                 that.renderTheSpec(that)
-             
+
               },
               error: function(data){
                 alert( 'Sorry.' );
@@ -293,11 +293,11 @@
               }
           });
         });
-        reader.readAsText(file);   
+        reader.readAsText(file);
       }
     },
 
-  
+
     async uploadTree(file) {
       console.log('uploadTree in fit_continuous')
 
@@ -308,7 +308,7 @@
           const text = e.srcElement.result;
           this.tree = text;
           console.log('Read tree file content!!');
-         
+
           // pass the tree file as a string to the server
           jQuery.ajax({
               url: '/fit_continuous/tree_upload',
@@ -326,19 +326,19 @@
               }
           });
         });
-        reader.readAsText(file);   
+        reader.readAsText(file);
       };
     },
-  
+
     async renderTheSpec(that) {
 
-      var spec = { 
+      var spec = {
 
-          title: "Fit continuous Result",
+          title: "Fit Continuous Result",
           width: 800,
           height: 800,
           layer: [
-            {data: {values: that.result.points, format:{type: "json"}}, 
+            {data: {values: that.result.points, format:{type: "json"}},
             params: [{
               name: "grid",
               select: "interval",
@@ -346,12 +346,12 @@
             }],
             mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
             encoding: {
-              x: {field: "pheno_xx", type: "quantitative"},
-              y: {field: "pheno_yy", type: "quantitative"},
+              x: {field: "Node_x_coord", type: "quantitative"},
+              y: {field: "Node_y_coord", type: "quantitative"},
               }
             },
-            {data: {values: that.result.connections, format:{type: "json"}}, 
-            mark: {type:"rule", fill: "#4C78A8", strokeWidth:0.4, tooltip: {content: "data"}},
+            {data: {values: that.result.connections, format:{type: "json"}},
+            mark: {type:"rule", color:"darkgreen", strokeWidth:0.4, tooltip: {content: "data"}},
             encoding: {
               x: {field: "V1_x", type: "quantitative"},
               x2: {field: "V2_x", type: "quantitative"},
@@ -361,11 +361,11 @@
             }
           ]
           };
-  
-          vegaEmbed(that.$refs.phenogram, spec);
-        }, 
 
- 
+          vegaEmbed(that.$refs.phenogram, spec);
+        },
+
+
 
     async downloadResults() {
       console.log('trying to buld csv and download')
@@ -376,7 +376,7 @@
           if ((key != 'points') && (key != 'connections')) {
           csvOutput += key+','
           }
-      } 
+      }
       csvOutput += "\n";
 
       for (const key in this.result) {
@@ -386,15 +386,15 @@
       }
       csvOutput += "\n";
 
- 
+
 	// the csv seems to be created correctly
         //console.log(csvOutput);
 	//csvOutput = JSON.stringify(csvOutput)
 	console.log(csvOutput)
   const url = window.URL.createObjectURL(new Blob([csvOutput]));
 	console.log("url:",url)
-	// this is an old but still normal way to download a file, attach it to an 
-	// <a> tag and click the link.  We then remove the tag after downloaing. 
+	// this is an old but still normal way to download a file, attach it to an
+	// <a> tag and click the link.  We then remove the tag after downloaing.
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', 'model_results.csv') //or any other extension;

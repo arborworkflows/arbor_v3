@@ -246,8 +246,22 @@ pheno_xx <- pheno_object$xx
 pheno_yy <- pheno_object$yy
 
 pheno_points <- cbind(pheno_xx, pheno_yy)
+
+# Get the tip names to add to the points file
+tip_names <- phy$tip.label
+# Figure out how many NAs we need for filler
+filler_length <- length(pheno_xx) - length(tip_names)
+# Create filler vector
+filler <- rep("None", filler_length)
+# Concatenate vectors
+names_filler <- c(tip_names, filler)
+# Now create final dataframe
+pheno_output <- cbind.data.frame(pheno_xx, pheno_yy, names_filler)
+# Rename columns
+colnames(pheno_output) <- c("Node_x_coord", "Node_y_coord", "Species")
+
 # Write pheno_points to a file for use with Vega
-write.csv(pheno_points, pheno_points_file, row.names = FALSE)
+write.csv(pheno_output, pheno_points_file, row.names = FALSE)
 
 # Now create CSV for drawing edges in Vega
 # Temporary first two rows because R is silly about creating dfs iteratively
