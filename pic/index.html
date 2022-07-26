@@ -7,137 +7,124 @@
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.js" rel="stylesheet">  -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-  <title>Fit Continuous</title>
+  <title>PIC</title>
 </head>
 
 <body>
   <div id="app">
     <v-app>
-    <v-layout class="transform-view" row fill-height>
-      <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
-        <v-toolbar dark flat color="primary">
-          <v-toolbar-title class="white--text">Fit Continuous</v-toolbar-title>
-        </v-toolbar>
-        <v-container fluid>
-          <v-flex xs12>
-            <v-btn class="text-none" outline block @click='$refs.tableFile.click()'>{{ tableFileName || 'UPLOAD TABLE' }}</v-btn>
-            <input
-              type="file"
-              style="display: none"
-              ref="tableFile"
-              @change="uploadTable($event.target.files[0])"
-            >
-          </v-flex>
-          <v-flex xs12>
-            <v-btn class="text-none" outline block @click='$refs.treeFile.click()'>{{ treeFileName || 'UPLOAD TREE' }}</v-btn>
-            <input
-              type="file"
-              style="display: none"
-              ref="treeFile"
-              @change="uploadTree($event.target.files[0])"
-            >
-          </v-flex>
-          <v-flex xs12>
-            <v-select label="Column" v-model="selectedColumn" :items="columns" />
-          </v-flex>
-          <v-flex xs12>
-            <v-select label="Select Model"  v-model="selectedModel" :items="models" />
-          </v-flex>
-	  <v-flex xs12>
-	    <textarea style="width: 100%" v-model="stdError" placeholder="Input your standard error (Numeric value only)"></textarea>
-          </v-flex>
-	  <v-flex xs12>
-            <v-btn
-              block
-              :class="{ primary: readyToRun }"
-              :flat="readyToRun"
-              :outline="!readyToRun"
-              :disabled="!readyToRun"
-              @click="run"
-            >
-              Go
-            </v-btn>
-          </v-flex>
-        </v-container>
+        <v-layout class="transform-view" row fill-height>
+          <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
+            <v-toolbar dark flat color="primary">
+              <v-toolbar-title class="white--text">PIC</v-toolbar-title>
+            </v-toolbar>
+            <v-container fluid>
+              <v-flex xs12>
+                <v-btn class="text-none" outline block @click='$refs.tableFile.click()'>{{ tableFileName || 'UPLOAD TABLE' }}</v-btn>
+                <input
+                  type="file"
+                  style="display: none"
+                  ref="tableFile"
+                  @change="uploadTable($event.target.files[0])"
+                >
+              </v-flex>
+              <v-flex xs12>
+                <v-btn class="text-none" outline block @click='$refs.treeFile.click()'>{{ treeFileName || 'UPLOAD TREE' }}</v-btn>
+                <input
+                  type="file"
+                  style="display: none"
+                  ref="treeFile"
+                  @change="uploadTree($event.target.files[0])"
+                >
+              </v-flex>
+              <v-flex xs12>
+                <v-select label="Independent Variable" v-model="independentVariable" :items="columns" />
+              </v-flex>
+              <v-flex xs12>
+                <v-select label="Dependent Variable"  v-model="dependentVariable" :items="columns" />
+              </v-flex>
 
-        <v-container fluid>
-         <v-flex xs12>
-            <v-btn
-              block
-              :class="{ primary: readyToDownload }"
-              :flat="readyToDownload"
-              :outline="!readyToDownload"
-              :disabled="!readyToDownload"
-              @click="downloadResults"
-            >
-              Download Model Results
-            </v-btn>
-          </v-flex>
-        </v-container>
+              <v-flex xs12>
+                <v-radio-group v-model ="logop">
+              		<v-radio
+              		   label = "Take the log of the chosen variables"
+              		   value = "Yes">
+              		</v-radio>
+              		<v-radio
+              		   label = "Do not take the log of the chosen variables"
+              		   value = "No">
+              		</v-radio>
+	               </v-radio-group>
+	             </v-flex>
+
+    	  <v-flex xs12>
+                <v-btn
+                  block
+                  :class="{ primary: readyToRun }"
+                  :flat="readyToRun"
+                  :outline="!readyToRun"
+                  :disabled="!readyToRun"
+                  @click="run"
+                >
+                  Go
+                </v-btn>
+              </v-flex>
+            </v-container>
+
+            <v-container fluid>
+             <v-flex xs12>
+                <v-btn
+                  block
+                  :class="{ primary: readyToDownload }"
+                  :flat="readyToDownload"
+                  :outline="!readyToDownload"
+                  :disabled="!readyToDownload"
+                  @click="downloadResults"
+                >
+                  Download Model Results
+                </v-btn>
+              </v-flex>
+            </v-container>
 
 
-      </v-navigation-drawer>
-      <v-layout column justify-start fill-height style="margin-left: 400px">
-          <v-card class="ma-4">
-            <v-card-text>
-              <b>FitContinuous</b> is an app that runs the fitContinuous function in the R package geiger (Pennell et al., 2014). It fits various likelihood models for continuous character evolution and returns parameter estimates and a maximum likelihood estimate.
-              <br><br>
-              1. Upload your table (.csv) and tree (Newick, .phy). Note: tables are assumed to have species names as row names.
-              <br><br>
-              2. Select the desired column to run fitContinuous on.
-              <br><br>
-              3. Select the desired Model and input your standard error.
-              <br>
-              Models include:
-              <br>
-                <ul>
-                  <li>BM (Brownian Motion)</li>
-                  <li>OU (Ornstein-Uhlenbeck)</li>
-                  <li>EB (Early-Burst)</li>
-                  <li>rate_trend (diffusion model with linear trend in rates through time)</li>
-                  <li>lambda (one of the Pagel (1999) models that fits the extent to which the phylogeny predicts covariance among trait values for species)</li>
-                  <li>kappa (character divergence is related to the number of speciation events between two species)</li>
-                  <li>delta (time-dependent model of trait evolution)</li>
-                  <li>mean_trend (sensible only for non-ultrametric trees; directional drift/trend toward smaller or larger values through time)</li>
-                  <li>white (white-noise)</li>
-                </ul>
-              <br>
-                    4. Click GO.
-                    <br><br>
-              <br><br>
-              Sources cited: Pagel M. 1999. Inferring the historical patterns of biological evolution. Nature 401: 877-884.
-              <br>
-              Pennel, M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
-
-            </v-card-text>
-          </v-card>
-
-        <div xs12 class="text-xs-center mb-4 ml-4 mr-4">
-
-          <!-- <template v-if="runCompleted">  -->
-
-            <v-card class ="mb-4 ml-4 mr-4">
-              <v-card-text>
-            <b>Maximum-Likelihood Estimate:</b>
-            <br></br>
-            lnL: {{ result.lnL }}
-            <br></br>
-            aic: {{ result.aic }}
-              </v-card-text>
-            </v-card>
-                  <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
-                    <v-card-text>Result summary</v-card-text>
-                      <table id="resultTable" class="display" width="100%"></table>
-                  </v-card>
-            <v-card class ="mb-4 ml-4 mr-4">
-              <v-card-text>Phenogram Plot</v-card-text>
-              <div ref="phenogram"></div>
+          </v-navigation-drawer>
+          <v-layout column justify-start fill-height style="margin-left: 400px">
+              <v-card class="ma-4">
+                <v-card-text>
+                  Phylogenetically Independent Contrasts (<b>PICs</b>) allow us to assess whether or not two characters have evolved together (ie. are evolutionarily correlated). This app uses the pic() function in the R package ape (Paradis and Schliep, 2019).
+                  <br><br>
+                  1. Upload your table (.csv) and tree (Newick, .phy). Note: tables are assumed to have species names as row names.
+                  <br><br>
+                  2. Select your independent and dependent variables for the PIC.
+                  <br><br>
+                  3. Click GO.
+                  <br><br>
+    	      <br><br>
+    	      Source cited: Paradis E. & K. Schliep. 2019. ape 5.0: an environment for modern phylogenetics and evolutionary analyses in R. Bioinformatics 35: 526-528.
+    	    </v-card-text>
               </v-card>
-          <!-- </template> -->
-        </div>
-      </v-layout>
-    </v-layout>
-  </v-app>
+              <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
+                <v-card-text>{{ tableFileName }}</v-card-text>
+                <json-data-table :data="table" />
+              </v-card>
+            <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+              Running (Job Status {{ job.status }}) ...
+            </div>
+            <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
+            <template v-if="!running && job.status === 3">
+
+              <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
+                <v-card-text>Result summary</v-card-text>
+                <json-data-table :data="result" hide-actions/>
+              </v-card>
+    	  <v-card class ="mb-4 ml-4 mr-4">
+    	     <v-card-text>PIC Plot</v-card-text>
+    	     <img :src="plotUrl" style="display: block; margin: auto">
+    	     </v-card>
+            </template>
+          </v-layout>
+        </v-layout>
+      </v-app>
   </div>
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
@@ -164,27 +151,22 @@
       el: '#app',
       vuetify: new Vuetify(),
 
-  data: () => ({
-    tableFile: {},
-    table: [],
-    treeFile: {},
-    tableFileName: '',
-    treeFileName: '',
-    job: { status: 0 },
-    running: false,
-    runCompleted: false,
-    columns: [],
-    selectedColumn: null,
-    models:['BM','OU','EB','rate_trend','lambda','kappa','delta','mean_trend','white'],
-    selectedModel: '',
-    stdError: '',
-    result: [],
-    lnL: 0,
-    resultColumns: [],
-    plotUrl: '',
-
-
-  }),
+    data: () => ({
+      tableFile: {},
+      table: [],
+      treeFile: {},
+      tableFileName: '',
+      treeFileName: '',
+      job: { status: 0 },
+      running: false,
+      columns: [],
+      independentVariable: null,
+      dependentVariable: null,
+      logop: null,
+      result: [],
+      resultColumns: [],
+      plotUrl: '',
+    }),
   asyncComputed: {
     scratchFolder() {
       return scratchFolder(this.girderRest);
@@ -194,13 +176,13 @@
     readyToRun() {
       return !!this.treeFileName &&
         !!this.tableFileName &&
-        !!this.selectedColumn &&
-	!!this.selectedModel &&
-	!!this.stdError;
+        !!this.independentVariable &&
+	      !!this.dependentVariable &&
+        !!this.logop;
     },
 
     readyToDownload() {
-      return (this.result && !this.running && this.runCompleted)
+      return (this.result.length>0 && !this.running && this.job.status===3)
     },
 
   },
@@ -239,16 +221,15 @@
               type: "POST",
               contentType: 'application/json',
               data: JSON.stringify({
-                column: this.selectedColumn,
-                model: this.selectedModel,
-                stdError: this.stdError
+                ind_var: this.independentVariable,
+                dep_var: this.dependentVariable,
+                logop: this.logop
               }),
               success: function(returnedData) {
                 var dataAsJSON = JSON.parse(returnedData)
                 console.log('content returned:',dataAsJSON)
                 // use the temporay that we initialized above
                 that.result = dataAsJSON
-                that.lnL = dataAsJSON["lnL"]
                 that.runCompleted = true
                 // Kristen: other variables here
                 that.running = false
@@ -266,7 +247,7 @@
 
 
     async uploadTable(file) {
-      console.log('uploadTable in fit_continuous was called')
+      console.log('uploadTable in PIC was called')
 
       if (file) {
         this.tableFileName = file.name;
@@ -299,7 +280,7 @@
 
 
     async uploadTree(file) {
-      console.log('uploadTree in fit_continuous')
+      console.log('uploadTree in PIC')
 
       if (file) {
         this.treeFileName = file.name;
