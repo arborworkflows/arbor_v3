@@ -235,7 +235,7 @@
       var that = this
 
       jQuery.ajax({
-              url: '/fit_continuous/run',
+              url: '/pic/run',
               type: "POST",
               contentType: 'application/json',
               data: JSON.stringify({
@@ -279,7 +279,7 @@
 
           // pass the table data to the server backend
           jQuery.ajax({
-              url: '/fit_continuous/table_upload',
+              url: '/pic/table_upload',
               type: "POST",
               contentType: 'application/json',
               data: JSON.stringify({
@@ -311,7 +311,7 @@
 
           // pass the tree file as a string to the server
           jQuery.ajax({
-              url: '/fit_continuous/tree_upload',
+              url: '/pic/tree_upload',
               type: "POST",
               //processData: false,
               contentType: 'application/json',
@@ -334,7 +334,7 @@
 
       var spec = {
 
-          title: "Fit Continuous Result",
+          title: "PIC Result",
           width: 800,
           height: 800,
           layer: [

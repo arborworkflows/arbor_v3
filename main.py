@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 
 # import your apps
 import fit_continuous
+import pic
 import trait_explorer
 
 app = FastAPI()
@@ -10,6 +11,7 @@ app = FastAPI()
 # initialize your apps
 #trait_explorer.init(app)
 fit_continuous.init(app)
+pic.init(app)
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
 
