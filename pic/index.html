@@ -97,7 +97,9 @@
                   <br><br>
                   2. Select your independent and dependent variables for the PIC.
                   <br><br>
-                  3. Click GO.
+                  3. Choose whether you would like the values to be logged (natural log will be used).
+                  <br><br>
+                  4. Click GO.
                   <br><br>
     	      <br><br>
     	      Source cited: Paradis E. & K. Schliep. 2019. ape 5.0: an environment for modern phylogenetics and evolutionary analyses in R. Bioinformatics 35: 526-528.
@@ -327,8 +329,8 @@
             }],
             mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
             encoding: {
-              x: {field: "Node_x_coord", type: "quantitative"},
-              y: {field: "Node_y_coord", type: "quantitative"},
+              x: {field: "pic_ind", type: "quantitative"},
+              y: {field: "pic_dep", type: "quantitative"},
               }
             },
             {data: {values: that.result.points, format:{type: "json"}},
@@ -337,22 +339,16 @@
               select: "interval",
               bind: "scales"
             }],
-            mark: {type:"text", fill: "#000000", align: {expr:"datum.Node_x_coord"}, dx: {expr:10}},
+            mark: {type:"line", color:"firebrick"},
+            transform: [
+              {regression: "pic_dep", on: "pic_ind"}
+            ],
             encoding: {
-              x: {field: "Node_x_coord", type: "quantitative"},
-              y: {field: "Node_y_coord", type: "quantitative"},
-              text: {field: "Species", type: "ordinal"},
-              }
-            },
-            {data: {values: that.result.connections, format:{type: "json"}},
-            mark: {type:"rule", color:"darkgreen", strokeWidth:0.4, tooltip: {content: "data"}},
-            encoding: {
-              x: {field: "V1_x", type: "quantitative"},
-              x2: {field: "V2_x", type: "quantitative"},
-              y: {field: "V1_y", type: "quantitative"},
-              y2: {field: "V2_y", type: "quantitative"},
+              x: {field: "pic_ind", type: "quantitative"},
+              y: {field: "pic_dep", type: "quantitative"},
               }
             }
+
           ]
           };
 

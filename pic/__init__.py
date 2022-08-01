@@ -89,9 +89,9 @@ def init(app):
     @app.post('/pic/run')
     async def run(params : Request):
         params_obj =  await params.json()
-        print('run with column:',params_obj['column'])
-        print('run with model',params_obj['model'])
-        print('run with stdError:',params_obj['stdError'])
+        print('run with independent variable:',params_obj['ind_var'])
+        print('run with dependent variable',params_obj['dep_var'])
+        print('run with log choice:',params_obj['logop'])
         returnContent =  run_method(params_obj)
         return Response(content=returnContent, media_type='text/html')
         #return await Response(content=json.dumps(run(params_obj)),media_type='text/html')
