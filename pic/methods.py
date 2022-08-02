@@ -100,7 +100,7 @@ write.csv(pic, pic_plot_file, row.names = FALSE)
     result_as_dict = result_df.to_dict('records')
     print('result as dict:',result_as_dict)
 
-    # retreive the phenogram information from the R result
+    # retreive the PIC information from the R result
     points_df = pd.read_csv('/tmp/pic_points.csv')
     points_json = points_df.to_dict('records')
     print(points_json)
@@ -111,9 +111,11 @@ write.csv(pic, pic_plot_file, row.names = FALSE)
     # repack from pandas dataframe into a dictionary.
     # values are returned as a list of one dictionary, so pick the first list entry
     result = {}
-    result['points'] = points_json
+
     for key in result_as_dict[0].keys():
         result[key] = result_as_dict[0][key]
+
+    result['points'] = points_json
 
     # return the data arrays here as a JSON blob to javascript
     # for javascript to render in vegalite

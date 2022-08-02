@@ -112,18 +112,11 @@
             <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
               Running (Job Status {{ job.status }}) ...
             </div>
-            <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
-            <template v-if="!running && job.status === 3">
 
-              <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
-                <v-card-text>Result summary</v-card-text>
-                <json-data-table :data="result" hide-actions/>
-              </v-card>
     	  <v-card class ="mb-4 ml-4 mr-4">
     	     <v-card-text>PIC Plot</v-card-text>
-    	     <img :src="plotUrl" style="display: block; margin: auto">
-    	     </v-card>
-            </template>
+           <div ref="pic_plot"></div>
+           </v-card>
           </v-layout>
         </v-layout>
       </v-app>
@@ -316,43 +309,19 @@
     async renderTheSpec(that) {
 
       var spec = {
-
+          $schema: "https://vega.github.io/schema/vega-lite/v5.json",
           title: "PIC Result",
           width: 800,
           height: 800,
-          layer: [
-            {data: {values: that.result.points, format:{type: "json"}},
-            params: [{
-              name: "grid",
-              select: "interval",
-              bind: "scales"
-            }],
-            mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
+            data: {values: that.result.points, format:{type: "json"}},
+            mark: {type:"point", fill: "#4C78A8"},
             encoding: {
               x: {field: "pic_ind", type: "quantitative"},
               y: {field: "pic_dep", type: "quantitative"},
               }
-            },
-            {data: {values: that.result.points, format:{type: "json"}},
-            params: [{
-              name: "grid_2",
-              select: "interval",
-              bind: "scales"
-            }],
-            mark: {type:"line", color:"firebrick"},
-            transform: [
-              {regression: "pic_dep", on: "pic_ind"}
-            ],
-            encoding: {
-              x: {field: "pic_ind", type: "quantitative"},
-              y: {field: "pic_dep", type: "quantitative"},
-              }
-            }
-
-          ]
           };
 
-          vegaEmbed(that.$refs.phenogram, spec);
+          vegaEmbed(that.$refs.pic_plot, spec);
         },
 
 
