@@ -313,12 +313,39 @@
           title: "PIC Result",
           width: 800,
           height: 800,
-            data: {values: that.result.points, format:{type: "json"}},
-            mark: {type:"point", fill: "#4C78A8"},
-            encoding: {
-              x: {field: "pic_ind", type: "quantitative"},
-              y: {field: "pic_dep", type: "quantitative"},
+
+            layer: [
+              {
+              data: {values: that.result.points, format:{type: "json"}},
+              params: [{
+                name: "grid",
+                select: "interval",
+                bind: "scales"
+              }],
+
+              mark: {type:"point", fill: "#4C78A8"},
+              encoding: {
+                x: {field: "pic_ind", type: "quantitative"},
+                y: {field: "pic_dep", type: "quantitative"},
               }
+            },
+            {
+              data: {values: that.result.points, format:{type: "json"}},
+              params: [{
+                name: "grid2",
+                select: "interval",
+                bind: "scales"
+              }],
+              mark: {type: "line", color: "firebrick"},
+              transform: [
+                {regression: "pic_dep", on: "pic_ind"}
+              ],
+              encoding: {
+                x: {field: "pic_ind", type: "quantitative"},
+                y: {field: "pic_dep", type: "quantitative"}
+              }
+            }
+            ]
           };
 
           vegaEmbed(that.$refs.pic_plot, spec);
