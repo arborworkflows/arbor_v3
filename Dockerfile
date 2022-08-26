@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install -qy \
     libcurl4-openssl-dev \
     libfontconfig1-dev \
     libfribidi-dev \
+    libharfbuzz-dev \
     libfreetype6-dev \
     libpng-dev \
     libtiff5-dev \
