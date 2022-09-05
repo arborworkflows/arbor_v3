@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.js" rel="stylesheet">  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>ASR</title>
+</head>
+
+<body>
+  <div id="app">
+    <v-app>
+      <v-layout class="transform-view" row fill-height>
+        <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
+          <v-toolbar dark flat color="primary">
+            <v-toolbar-title class="white--text">Ancestral State Reconstruction</v-toolbar-title>
+          </v-toolbar>
+          <v-container fluid>
+            <v-flex xs12>
+              <v-btn class="text-none" outline block @click='$refs.tableFile.click()'>{{ tableFileName || 'UPLOAD TABLE' }}</v-btn>
+              <input
+                type="file"
+                style="display: none"
+                ref="tableFile"
+                @change="uploadTable($event.target.files[0])"
+              >
+            </v-flex>
+            <v-flex xs12>
+              <v-btn class="text-none" outline block @click='$refs.treeFile.click()'>{{ treeFileName || 'UPLOAD TREE' }}</v-btn>
+              <input
+                type="file"
+                style="display: none"
+                ref="treeFile"
+                @change="uploadTree($event.target.files[0])"
+              >
+            </v-flex>
+            <v-flex xs12>
+              <v-select label="Column" v-model="selColumn" :items="columns" />
+            </v-flex>
+            <v-flex xs12>
+              <v-btn
+                block
+                :class="{ primary: readyToRun }"
+                :flat="readyToRun"
+                :outline="!readyToRun"
+                :disabled="!readyToRun"
+                @click="run"
+              >
+                Go
+              </v-btn>
+            </v-flex>
+          </v-container>
+
+          <v-container fluid>
+             <v-flex xs12>
+                <v-btn
+                  block
+                  :class="{ primary: readyToDownload }"
+                  :flat="readyToDownload"
+                  :outline="!readyToDownload"
+                  :disabled="!readyToDownload"
+                  @click="downloadResults"
+                >
+                  Download Model Results
+                </v-btn>
+              </v-flex>
+          </v-container>
+
+        </v-navigation-drawer>
+        <v-layout column justify-start fill-height style="margin-left: 400px">
+            <v-card class="ma-4">
+              <v-card-text>
+                <b>Ancestral State Reconstruction (ASR)</b> is an estimation of characters for ancestral taxa, given data for present-day taxa and a phylogenetic tree. This app returns a table of information about the reconstructed states for each node, as well as a phylogenetic tree with color-coded representation of character states.
+                <br><br>
+                1. Upload your table (.csv) and tree (Newick, .phy).
+                <br><br>
+                2. Select the desired column to run an ASR based on. You may choose either a continuous or a discrete character.
+                <br><br>
+                3. Click GO.
+                <br>
+              </v-card-text>
+            </v-card>
+
+            <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
+                <v-card-text>{{ tableFileName }}</v-card-text>
+                <json-data-table :data="table" />
+              </v-card>
+            <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+              Running (Job Status {{ job.status }}) ...
+            </div>
+
+            <v-card class ="mb-4 ml-4 mr-4">
+             <v-card-text>ASR Plot</v-card-text>
+             <div ref="asr_plot"></div>
+            </v-card>
+        </v-layout>
+      </v-layout>
+    </v-app>
+  </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+      <script src="https://cdn.jsdelivr.net/npm/vega@5.21.0"></script>
+      <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
+      <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.2"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3-dsv@3"></script>
+
+
+      <script>
+
+  //import JsonDataTable from '../components/JsonDataTable.vue';
+  //app.component('json-data-table', MyComponent)
+
+  //
+  //  this.result = csvParse((await this.girderRest.get(`item/${resultSummaryItem._id}/download`)).data);
+  //this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
+
+
+    new Vue({
+        el: '#app',
+        vuetify: new Vuetify(),
+
+      data: () => ({
+        tableFile: {},
+        table: [],
+        treeFile: {},
+        tableFileName: '',
+        treeFileName: '',
+        job: { status: 0 },
+        running: false,
+        columns: [],
+        selColumn: null,
+        result: [],
+        resultColumns: [],
+        plotUrl: '',
+      }),
+    asyncComputed: {
+      scratchFolder() {
+        return scratchFolder(this.girderRest);
+      },
+    },
+    computed: {
+      readyToRun() {
+        return !!this.treeFileName &&
+          !!this.tableFileName &&
+          !!this.selColumn;
+      },
+
+      readyToDownload() {
+        return (this.result.length>0 && !this.running && this.job.status===3)
+      },
+
+    },
+    methods: {
+
+      // thanks to: https://thegermancoder.com/2018/11/29/how-to-parse-csv-with-javascript/
+      CSVToArray(strData) {
+        let lines = strData.split(/(?:\r\n|\n)+/).filter(function(el) {return el.length != 0});
+        let headers = lines.splice(0, 1)[0].split(",");
+        let valuesRegExp = /(?:\"([^\"]*(?:\"\"[^\"]*)*)\")|([^\",]+)/g;
+        let elements = [];
+        for (let i = 0; i < lines.length; i++) {
+            let element = {};
+            let j = 0;
+            while (matches = valuesRegExp.exec(lines[i])) {
+                var value = matches[1] || matches[2];
+                value = value.replace(/\"\"/g, "\"");
+                element[headers[j]] = value;
+                j++;
+            }
+            elements.push(element);
+        }
+        return elements
+      },
+
+
+
+      async run() {
+        this.running = true;
+        this.errorLog = null;
+        // we need to do this because 'this' becomes undefined inside the callback
+        var that = this
+
+        jQuery.ajax({
+                url: '/asr/run',
+                type: "POST",
+                contentType: 'application/json',
+                data: JSON.stringify({
+                  selColumn: this.selColumn
+                }),
+                success: function(returnedData) {
+                  var dataAsJSON = JSON.parse(returnedData)
+                  console.log('content returned:',dataAsJSON)
+                  // use the temporay that we initialized above
+                  that.result = dataAsJSON
+                  that.runCompleted = true
+                  // Kristen: other variables here
+                  that.running = false
+                  that.renderTheSpec(that)
+
+                },
+                error: function(data){
+                  alert( 'Sorry.' );
+                  this.runCompleted = true
+                  this.running = false
+
+                }
+            });
+      },
+
+
+      async uploadTable(file) {
+        console.log('uploadTable in ASR was called')
+
+        if (file) {
+          this.tableFileName = file.name;
+          const reader = new FileReader();
+          reader.addEventListener('loadend', e => {
+            const text = e.srcElement.result;
+            //this.table = this.CSVToArray(text);
+            this.table = d3.csvParse(text)
+            this.columns = this.table.columns
+
+            // pass the table data to the server backend
+            jQuery.ajax({
+                url: '/asr/table_upload',
+                type: "POST",
+                contentType: 'application/json',
+                data: JSON.stringify({
+                  table: this.table
+                }),
+                success: function(data){
+                  console.log(data)
+                },
+                error: function(data){
+                  alert( 'Sorry.' );
+                }
+            });
+          });
+          reader.readAsText(file);
+        }
+      },
+
+
+      async uploadTree(file) {
+        console.log('uploadTree in ASR')
+
+        if (file) {
+          this.treeFileName = file.name;
+          const reader = new FileReader();
+          reader.addEventListener('loadend', e => {
+            const text = e.srcElement.result;
+            this.tree = text;
+            console.log('Read tree file content!!');
+
+            // pass the tree file as a string to the server
+            jQuery.ajax({
+                url: '/asr/tree_upload',
+                type: "POST",
+                //processData: false,
+                contentType: 'application/json',
+                data: JSON.stringify({
+                  tree: this.tree
+                }),
+                success: function(data){
+                  console.log('success!!')
+                },
+                error: function(data){
+                  alert( 'Sorry.' );
+                }
+            });
+          });
+          reader.readAsText(file);
+        };
+      },
+
+      async renderTheSpec(that) {
+
+        var spec = {
+            $schema: "https://vega.github.io/schema/vega-lite/v5.json",
+            title: "ASR Result",
+            width: 800,
+            height: 800,
+
+            };
+
+            vegaEmbed(that.$refs.asr_plot, spec);
+          },
+
+
+
+      async downloadResults() {
+        console.log('trying to buld csv and download')
+  	    // iterate through the first row to find the column names
+        var csvOutput = ''
+
+        for (var key in this.result) {
+            if ((key != 'points') && (key != 'connections')) {
+            csvOutput += key+','
+            }
+        }
+        csvOutput += "\n";
+
+        for (const key in this.result) {
+          if ((key != 'points') && (key != 'connections')) {
+            csvOutput += result[key]+','
+          }
+        }
+        csvOutput += "\n";
+
+
+  	// the csv seems to be created correctly
+          //console.log(csvOutput);
+  	//csvOutput = JSON.stringify(csvOutput)
+  	console.log(csvOutput)
+    const url = window.URL.createObjectURL(new Blob([csvOutput]));
+  	console.log("url:",url)
+  	// this is an old but still normal way to download a file, attach it to an
+  	// <a> tag and click the link.  We then remove the tag after downloaing.
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'model_results.csv') //or any other extension;
+          document.body.appendChild(link);
+          link.click();
+  	document.body.removeChild(link);
+      },
+
+    }
+  })
+</script>
+</body>
+</html>

@@ -6,6 +6,7 @@ import fit_continuous
 import pic
 import phylosignal
 import trait_explorer
+import asr
 
 app = FastAPI()
 
@@ -14,6 +15,7 @@ app = FastAPI()
 fit_continuous.init(app)
 pic.init(app)
 phylosignal.init(app)
+asr.init(app)
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
 
@@ -21,7 +23,5 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 def index():
     with open('index.html') as indexFile:
         indexContent = indexFile.read()
-    
+
     return Response(content=indexContent, media_type='text/html')
-
-
