@@ -35,8 +35,55 @@ def run_method(params):
     env['modelfit_summary_file'] = '/tmp/modelfile.csv'
     env['plot_file'] = '/tmp/plotfile.png'
     r('''
-  require(ape)
-print("Hello!")
+require(aRbor)
+
+tree <- read.tree(tree_file)
+table <- read.csv(table_file, check.names = FALSE)
+
+td <- make.treedata(tree, table) # Trying make.treedata for now...
+td <- select(td, as.name(column))
+phy <- td$phy
+dat <- td$dat
+type <- detectCharacterType(dat[[1]], cutoff = 0.2)
+
+if (type == "discrete") {
+    result <- physigArbor(td, charType=type, signalTest="pagelLambda", discreteModelType=disModel)
+    analysisType <- "discrete lambda"
+}
+
+if (type == "continuous") {
+    if(selModel=="Lambda") {
+      result <- physigArbor(td, charType=type, signalTest="pagelLambda")
+      analysisType <- "continuous lambda"
+    }
+
+    if (selModel=="K") {
+      result <- physigArbor(td, charType=type, signalTest="Blomberg")
+      analysisType <- "continuous K"
+    }
+}
+
+result <- t(as.data.frame(unlist(result)))
+rownames(result) <- analysisType
+if(selModel == "Lambda"){
+    colnames(result) <- c("Log-Likelihood (Lambda fixed at 0)",
+                        "Log-Likelihood (Lambda estimated)",
+                        "Chi-Squared Test Statistic",
+                        "Chi-Squared P Value",
+                        "AICc Score (Lambda fixed at 0)",
+                        "AICc Score (Lambda Estimated)",
+                        "Lambda Value")
+}
+if(selModel == "K") {
+    colnames(result) <- c("K",
+    		"vObs",
+    		"vRnd",
+    		"pVal",
+    		"zScore")
+}
+
+write.csv(result, modelfit_summary_file)
+
     ''')
     print('** need to collect result from R here')
 
