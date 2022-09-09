@@ -94,3 +94,6 @@ write.csv(result, modelfit_summary_file)
 
     result_as_dict = result_df.to_dict('records')
     print('result as dict:',result_as_dict)
+
+    returnString = json.dumps(result_as_dict)
+    return returnString

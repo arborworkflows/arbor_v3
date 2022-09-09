@@ -309,6 +309,7 @@ new Vue({
           disModel: this.selectedDiscrete
         }),
         success: function(returnedData) {
+          console.log('Returned data:', returnedData)
           var dataAsJSON = JSON.parse(returnedData)
           console.log('content returned:',dataAsJSON)
           // use the temporay that we initialized above
