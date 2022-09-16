@@ -5,7 +5,6 @@ from fastapi.staticfiles import StaticFiles
 import fit_continuous
 import pic
 import phylosignal
-import trait_explorer
 import asr
 
 app = FastAPI()
