@@ -6,6 +6,7 @@ import fit_continuous
 import pic
 import phylosignal
 import asr
+import fit_discrete
 
 app = FastAPI()
 
@@ -15,6 +16,7 @@ fit_continuous.init(app)
 pic.init(app)
 phylosignal.init(app)
 asr.init(app)
+fit_discrete.init(app)
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
 
