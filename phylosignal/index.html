@@ -267,7 +267,7 @@ new Vue({
     },
 
     readyToDownload() {
-      return (this.result.length>0 && !this.running && this.job.status===3)
+      return (this.result && !this.running && this.runCompleted)
     },
 
   },
@@ -391,40 +391,43 @@ new Vue({
       };
     },
 
-    async downloadResults() {
+    downloadResults() {
       console.log('trying to buld csv and download')
-	    // iterate through the first row to find the column names
+      // iterate through the first row to find the column names
       var csvOutput = ''
-
-      for (var key in this.result) {
-          if ((key != 'points') && (key != 'connections')) {
-          csvOutput += key+','
-          }
-      }
-      csvOutput += "\n";
-
+      // print the title line
       for (const key in this.result) {
         if ((key != 'points') && (key != 'connections')) {
-          csvOutput += result[key]+','
+        csvOutput += key+','
         }
       }
-      csvOutput += "\n";
+      // ToDo: would be best to strip off the last comma here
+      csvOutput += '\n'
 
+      // print out the values
+      for (const key in this.result) {
+        if ((key != 'points') && (key != 'connections')) {
+        csvOutput += this.result[key]+','
+        }
+      }
+      // ToDo: would be best to strip off the last comma here
+      csvOutput += '\n'
 
-    	// the csv seems to be created correctly
-      //console.log(csvOutput);
-    	//csvOutput = JSON.stringify(csvOutput)
-    	console.log(csvOutput)
+      // the csvOutput has been created as a string, now attach it to an
+      // HTML element in the window and click "download" on that element
+      // the local filename will be called whatever we use in the setAttribute
+      // call, currently it is "model_results.csv"
+      console.log(csvOutput)
       const url = window.URL.createObjectURL(new Blob([csvOutput]));
-    	console.log("url:",url)
-    	// this is an old but still normal way to download a file, attach it to an
-    	// <a> tag and click the link.  We then remove the tag after downloaing.
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', 'model_results.csv') //or any other extension;
-            document.body.appendChild(link);
-            link.click();
-    	document.body.removeChild(link);
+      console.log("url:",url)
+      // this is an old but still normal way to download a file, attach it to an
+      // <a> tag and click the link. We then remove the tag after downloaing.
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'model_results.csv') //or any other extension;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
 
   }

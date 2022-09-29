@@ -38,9 +38,22 @@ def run_method(params):
 require(ape)
 require(geiger)
 require(phytools)
-print('R is ready to execute the fit discrete method')
 
-result <- c(0,1,2,3,4)
+tree <- read.tree(tree_file)
+table <- read.csv(table_file, row.names = 1, check.names = FALSE)
+
+td <- treedata(tree, table)
+df <- as.data.frame(td$data)
+dat <- df[,column, drop = FALSE]
+phy <- td$phy
+
+print(column)
+
+result <- fitDiscrete(phy, dat, model, transform)
+
+result <- t(as.data.frame(unlist(result$opt)))
+rownames(result) <- "Primary results"
+print(result)
 
 write.csv(result, modelfit_summary_file)
     ''')
