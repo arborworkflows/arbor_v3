@@ -323,6 +323,25 @@ write.csv(pheno_df, pheno_connect_file, row.names = FALSE)
     for key in result_as_dict[0].keys():
         result[key] = result_as_dict[0][key]
 
+    # add the JSON version of the tree for rendering with Vega
+    result['jsonTree'] = {"values": [
+          {
+            "id": 1,
+            "name": "flare"
+          },
+          {
+            "id": 2,
+            "name": "analytics",
+            "parent": 1
+          },
+          {
+            "id": 3,
+            "name": "cluster",
+            "parent": 2
+          }
+          ]
+          }
+
     # return the data arrays here as a JSON blob to javascript
     # for javascript to render in vegalite
     returnString = json.dumps(result)

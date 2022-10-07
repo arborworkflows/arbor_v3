@@ -393,10 +393,14 @@ new Vue({
 
     downloadResults() {
       console.log('trying to buld csv and download')
+      
+      // this.result is an array. be sure to pick off the first element
+      // e.g. this.result[0] 
+      
       // iterate through the first row to find the column names
       var csvOutput = ''
       // print the title line
-      for (const key in this.result) {
+      for (const key in this.result[0]) {
         if ((key != 'points') && (key != 'connections')) {
         csvOutput += key+','
         }
@@ -405,9 +409,9 @@ new Vue({
       csvOutput += '\n'
 
       // print out the values
-      for (const key in this.result) {
+      for (const key in this.result[0]) {
         if ((key != 'points') && (key != 'connections')) {
-        csvOutput += this.result[key]+','
+        csvOutput += this.result[0][key]+','
         }
       }
       // ToDo: would be best to strip off the last comma here
