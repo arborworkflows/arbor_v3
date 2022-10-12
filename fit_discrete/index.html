@@ -339,7 +339,7 @@
           // iterate through the first row to find the column names
           var csvOutput = ''
           // print the title line
-          for (const key in this.result) {
+          for (const key in this.result[0]) {
             if ((key != 'points') && (key != 'connections')) {
             csvOutput += key+','
             }
@@ -348,9 +348,9 @@
           csvOutput += '\n'
 
           // print out the values
-          for (const key in this.result) {
+          for (const key in this.result[0]) {
             if ((key != 'points') && (key != 'connections')) {
-            csvOutput += this.result[key]+','
+            csvOutput += this.result[0][key]+','
             }
           }
           // ToDo: would be best to strip off the last comma here
