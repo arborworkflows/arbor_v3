@@ -291,10 +291,19 @@ pheno_df <- pheno_df[-1:-2,] # remove first two rows (bloop and blarp)
 # Write edge/connection csv
 write.csv(pheno_df, pheno_connect_file, row.names = FALSE)
 
+# Can we just create edge array and tip label objects to use back in Python? YES
+# Using phy instead of tree because phy is the tree after dropping nonmatching tips
+edges <- phy[["edge"]]
+tip_labels <- phy[["tip.label"]]
+
     ''')
     print('** need to collect result from R here')
     #print(env['result'])
     #print(type(env['result']))
+
+    print("Here are the edges:", env['edges'])
+    print("Here are the labels:", env['tip_labels'])
+
 
     #valuesOnlyButNoKeys = np.asarray(env['result'])
     result_df = pd.read_csv('/tmp/modelfile.csv')
