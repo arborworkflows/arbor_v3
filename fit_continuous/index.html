@@ -138,6 +138,11 @@
                 <v-card-text>Tree Plot</v-card-text>
                 <div ref="jsontree"></div>
                 </v-card>
+
+              <v-card class ="mb-4 ml-4 mr-4">
+                <v-card-text>Tree Plot</v-card-text>
+                <div ref="squaretree"></div>
+                </v-card>
           <!-- </template> -->
         </div>
       </v-layout>
@@ -259,6 +264,7 @@
                 that.running = false
                 that.renderTheSpec(that)
                 that.renderPrettyJsonTree(that)
+                that.renderSquareTree(that)
               },
               error: function(data){
                 alert( 'Sorry.' );
@@ -510,6 +516,56 @@
 
     vegaEmbed(that.$refs.jsontree, spec);
   },
+
+  async renderTheSpec(that) {
+
+    var spec = {
+
+        title: "Fit Continuous Result",
+        width: 800,
+        height: 800,
+        layer: [
+          {data: {values: that.result.points, format:{type: "json"}},
+          params: [{
+            name: "grid",
+            select: "interval",
+            bind: "scales"
+          }],
+          mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
+          encoding: {
+            x: {field: "Node_x_coord", type: "quantitative"},
+            y: {field: "Node_y_coord", type: "quantitative"},
+            }
+          },
+          {data: {values: that.result.points, format:{type: "json"}},
+          params: [{
+            name: "grid_2",
+            select: "interval",
+            bind: "scales"
+          }],
+          mark: {type:"text", fill: "#000000", align: {expr:"datum.Node_x_coord"}, dx: {expr:10}},
+          encoding: {
+            x: {field: "Node_x_coord", type: "quantitative"},
+            y: {field: "Node_y_coord", type: "quantitative"},
+            text: {field: "Species", type: "ordinal"},
+            }
+          },
+          {data: {values: that.result.connections, format:{type: "json"}},
+          mark: {type:"rule", color:"darkgreen", strokeWidth:0.4, tooltip: {content: "data"}},
+          encoding: {
+            x: {field: "V1_x", type: "quantitative"},
+            x2: {field: "V1_x", type: "quantitative"},
+            x3: {field: "V2_x", type: "quantitative"},
+            y: {field: "V1_y", type: "quantitative"},
+            y2: {field: "V2_y", type: "quantitative"},
+            y3: {field: "V2_y", type: "quantitative"}
+            }
+          }
+        ]
+        };
+
+        vegaEmbed(that.$refs.squaretree, spec);
+      },
 
 
 
