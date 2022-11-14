@@ -49,7 +49,7 @@ if (type == "continuous") td1 <- forceNumeric(td1)
 if (type == "discrete") td1 <- forceFactor(td1)
 
 output <- ace.treedata(td1, charType = type, aceType = method)
-
+print(output)
 TH <- max(branching.times(td$phy))
 
 plotsize = 1000
@@ -129,24 +129,24 @@ write.csv(edge_df, connect_file, row.names = FALSE)
     result_df.rename(columns = {'Unnamed: 0':'Name'}, inplace = True)
     print(result_df)
 
-    result_as_dict = result_df.to_dict('records')
-    print('result as dict:',result_as_dict)
+    result_as_dict_list = result_df.to_dict('records')
+    #print('result as dict_list:',result_as_dict_list)
 
     # retreive the tree information from the R result
     connections_df = pd.read_csv('/tmp/connect_file.csv')
     points_df = pd.read_csv('/tmp/points_file.csv')
     connections_json = connections_df.to_dict('records')
     points_json = points_df.to_dict('records')
-    print(points_json)
+    #print(points_json)
 
     # repack from pandas dataframe into a dictionary.
-    # values are returned as a list of one dictionary, so pick the first list entry
+
     result = {}
     result['points'] = points_json
     result['connections'] = connections_json
-    for key in result_as_dict[0].keys():
-        result[key] = result_as_dict[0][key]
-
+    # values are returned as a list of dictionaries
+    result['traits'] = result_as_dict_list
+    
     # return the data arrays here as a JSON blob to javascript
     # for javascript to render in vegalite
     returnString = json.dumps(result)

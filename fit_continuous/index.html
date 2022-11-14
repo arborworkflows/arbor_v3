@@ -134,6 +134,7 @@
               <div ref="phenogram"></div>
               </v-card>
 
+              <!--
               <v-card class ="mb-4 ml-4 mr-4">
                 <v-card-text>Tree Plot</v-card-text>
                 <div ref="jsontree"></div>
@@ -143,6 +144,8 @@
                 <v-card-text>Tree Plot</v-card-text>
                 <div ref="squaretree"></div>
                 </v-card>
+              -->
+
           <!-- </template> -->
         </div>
       </v-layout>
@@ -346,7 +349,7 @@
       var spec = {
 
           title: "Fit Continuous Result",
-          width: 800,
+          width: 1200,
           height: 800,
           layer: [
             {data: {values: that.result.points, format:{type: "json"}},
@@ -375,7 +378,7 @@
               }
             },
             {data: {values: that.result.connections, format:{type: "json"}},
-            mark: {type:"rule", color:"darkgreen", strokeWidth:0.4, tooltip: {content: "data"}},
+            mark: {type:"rule", color:"darkgreen", strokeWidth:1, tooltip: {content: "data"}},
             encoding: {
               x: {field: "V1_x", type: "quantitative"},
               x2: {field: "V2_x", type: "quantitative"},
@@ -395,7 +398,7 @@
         var spec = {
 
         title: "Fit Continuous Result",
-        width: 800,
+        width: 1200,
         height: 800,
         $schema: "https://vega.github.io/schema/vega/v5.json",
         description: "An example of Cartesian layouts for a node-link diagram of hierarchical data.",
@@ -517,12 +520,12 @@
     vegaEmbed(that.$refs.jsontree, spec);
   },
 
-  async renderTheSpec(that) {
+  async squareTreeRender(that) {
 
     var spec = {
 
         title: "Fit Continuous Result",
-        width: 800,
+        width: 1200,
         height: 800,
         layer: [
           {data: {values: that.result.points, format:{type: "json"}},
@@ -555,12 +558,19 @@
           encoding: {
             x: {field: "V1_x", type: "quantitative"},
             x2: {field: "V1_x", type: "quantitative"},
-            x3: {field: "V2_x", type: "quantitative"},
             y: {field: "V1_y", type: "quantitative"},
             y2: {field: "V2_y", type: "quantitative"},
-            y3: {field: "V2_y", type: "quantitative"}
             }
-          }
+          },
+          {data: {values: that.result.connections, format:{type: "json"}},
+          mark: {type:"rule", color:"darkgreen", strokeWidth:0.4, tooltip: {content: "data"}},
+          encoding: {
+            x: {field: "V1_x", type: "quantitative"},
+            x2: {field: "V2_x", type: "quantitative"},
+            y: {field: "V2_y", type: "quantitative"},
+            y2: {field: "V2_y", type: "quantitative"}
+            }
+          },
         ]
         };
 
