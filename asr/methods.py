@@ -122,6 +122,7 @@ write.csv(edge_df, connect_file, row.names = FALSE)
     print('** need to collect result from R here')
     #print(env['result'])
     #print(type(env['result']))
+    print('feature type was:',env['type'])
 
     #valuesOnlyButNoKeys = np.asarray(env['result'])
     result_df = pd.read_csv('/tmp/modelfile.csv')

@@ -345,8 +345,8 @@
           }],
           mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
           encoding: {
-            x: {field: "Node_x_coord", type: "quantitative"},
-            y: {field: "Node_y_coord", type: "quantitative"},
+            x: {field: "Node_x_coord", type: "quantitative", axis: {grid: false},},
+            y: {field: "Node_y_coord", type: "quantitative", axis: {grid: false},},
             }
           },
           {data: {values: that.result.points, format:{type: "json"}},
@@ -363,7 +363,7 @@
             }
           },
           {data: {values: that.result.connections, format:{type: "json"}},
-          mark: {type:"rule", color:"darkgreen", strokeWidth:0.4, tooltip: {content: "data"}},
+          mark: {type:"rule", color:"darkgreen", strokeWidth:1.0, tooltip: {content: "data"}},
           encoding: {
             x: {field: "V1_x", type: "quantitative"},
             x2: {field: "V1_x", type: "quantitative"},
@@ -372,7 +372,7 @@
             }
           },
           {data: {values: that.result.connections, format:{type: "json"}},
-          mark: {type:"rule", color:"darkgreen", strokeWidth:0.4, tooltip: {content: "data"}},
+          mark: {type:"rule", color:"darkgreen", strokeWidth:1.0, tooltip: {content: "data"}},
           encoding: {
             x: {field: "V1_x", type: "quantitative"},
             x2: {field: "V2_x", type: "quantitative"},
