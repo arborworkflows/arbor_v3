@@ -7,7 +7,7 @@
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.js" rel="stylesheet">  -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-  <title>Fit Continuous</title>
+  <title>Fit Discrete</title>
 </head>
 
 <body>
@@ -326,9 +326,43 @@
           title: "Fit Discrete Result",
           width: 800,
           height: 800,
-
+          layer: [
+            {data: {values: that.result.points, format:{type: "json"}},
+            params: [{
+              name: "grid",
+              select: "interval",
+              bind: "scales"
+            }],
+            mark: {type:"point", fill: "#4C78A8"},
+            encoding: {
+              x: {field: "x", type: "quantitative"},
+              y: {field: "y", type: "quantitative"},
+              }
+            },
+            {data: {values: that.result.points, format:{type: "json"}},
+            params: [{
+              name: "grid_2",
+              select: "interval",
+              bind: "scales"
+            }],
+            mark: {type:"text", fill: "#000000", align: {expr:"datum.x"}, dx: {expr:10}},
+            encoding: {
+              x: {field: "x", type: "quantitative"},
+              y: {field: "y", type: "quantitative"},
+              text: {field: "alpha_names", type: "ordinal"},
+              }
+            },
+            {data: {values: that.result.graph, format:{type: "json"}},
+            mark: {type:"rule", color:"darkgreen", strokeWidth:1},
+            encoding: {
+              x: {field: "x1", type: "quantitative"},
+              x2: {field: "x2", type: "quantitative"},
+              y: {field: "y1", type: "quantitative"},
+              y2: {field: "y2", type: "quantitative"},
+              }
+            }
+          ]
           };
-
           vegaEmbed(that.$refs.model_plot, spec);
         },
 

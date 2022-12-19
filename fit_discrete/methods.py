@@ -35,6 +35,7 @@ def run_method(params):
     env['modelfit_summary_file'] = '/tmp/modelfile.csv'
     env['plot_file'] = '/tmp/plotfile.png'
     env['graph_file'] = '/tmp/graphfile.csv'
+    env['point_file'] = '/tmp/graphpoints.csv'
     r('''
 require(ape)
 require(geiger)
@@ -103,6 +104,9 @@ cart_points = data.frame(x=Re(points), y = Im(points))
 # Create key dataframe
 key <- cbind(cart_points, alpha_names)
 
+# Should we write the key to a file too?
+write.csv(key, point_file, row.names = FALSE)
+
 # Create a VEGA-useable dataframe with points and info
 x1 <- 1:tot
 y1 <- 1:tot
@@ -148,6 +152,10 @@ write.csv(combo_df, graph_file, row.names = FALSE)
     graph_json = graph_df.to_dict('records')
     print(graph_json)
 
+    key_df = pd.read_csv('/tmp/graphpoints.csv')
+    key_json = key_df.to_dict('records')
+    print(key_json)
+
     # [{},{}]
     # json:  {'data': []}
 
@@ -155,6 +163,7 @@ write.csv(combo_df, graph_file, row.names = FALSE)
     # values are returned as a list of one dictionary, so pick the first list entry
     result = {}
     result['graph'] = graph_json
+    result['points'] = key_json
     for key in result_as_dict[0].keys():
         result[key] = result_as_dict[0][key]
 
