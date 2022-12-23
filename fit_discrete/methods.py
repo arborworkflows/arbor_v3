@@ -115,6 +115,8 @@ y2 <- 1:tot
 name1 <- 1:tot
 name2 <- 1:tot
 transrate <- direction_df$TransRate
+midpoint_x <- 1:tot
+midpoint_y <- 1:tot
 
 for(i in 1:tot) {
   from <- direction_df[i,1] # ith row, 1st column
@@ -127,10 +129,13 @@ for(i in 1:tot) {
   x2[i] <- key[to,1]
   y2[i] <- key[to,2]
   name2[i] <- key[to,3]
+
+  midpoint_x[i] <- (x1[i] + x2[i])/2
+  midpoint_y[i] <- (y1[i] + y2[i])/2
 }
 
 # Create final combined dataframe
-combo_df <- cbind(x1,y1,name1,x2,y2,name2,transrate)
+combo_df <- cbind(x1,y1,name1,x2,y2,name2,transrate,midpoint_x,midpoint_y)
 write.csv(combo_df, graph_file, row.names = FALSE)
 
     ''')
@@ -169,7 +174,7 @@ write.csv(combo_df, graph_file, row.names = FALSE)
 
     # return the data arrays here as a JSON blob to javascript
     # for javascript to render in vegalite
-    returnString = json.dumps(result_as_dict)
+    returnString = json.dumps(result)
     return returnString
 
     ## Kristen wanted to try pandas.DataFrame.to_json! Might be more streamlined?
