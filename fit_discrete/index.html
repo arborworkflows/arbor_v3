@@ -359,7 +359,17 @@
               x2: {field: "x2", type: "quantitative"},
               y: {field: "y1", type: "quantitative"},
               y2: {field: "y2", type: "quantitative"},
-              }
+              },
+           
+            },
+            {data: {values: that.result.graph, format:{type: "json"}},
+            mark: {type:"text", color:"blue", "dy": {"expr": 10}},
+            encoding: {
+              x: {field: "midpoint_x", type: "quantitative"},
+              y: {field: "midpoint_y", type: "quantitative"},
+              text: {field: "transrate", type: "quantitative"},
+              },
+           
             }
           ]
           };
@@ -371,10 +381,16 @@
         downloadResults() {
           console.log('trying to buld csv and download')
           // iterate through the first row to find the column names
+          console.log('this.result',this.result)
+          console.log('the props are:')
+          for (const prop in this.result) {
+            console.log(prop)
+          }
           var csvOutput = ''
           // print the title line
+          // exclude the graph objects 
           for (const key in this.result) {
-            if ((key != 'points') && (key != 'connections')) {
+            if ((key != 'points') && (key != 'connections') && (key != 'graph')) {
             csvOutput += key+','
             }
           }
@@ -382,8 +398,9 @@
           csvOutput += '\n'
 
           // print out the values
+          // exclude the graph objects
           for (const key in this.result) {
-            if ((key != 'points') && (key != 'connections')) {
+            if ((key != 'points') && (key != 'connections') && (key != 'graph')) {
             csvOutput += this.result[key]+','
             }
           }
