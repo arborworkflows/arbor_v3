@@ -20,11 +20,16 @@ def table_upload():
 def run_method(params):
     # pull the arguments from the JSON object
     print(   'got to the run method'   )
+    mult_op = params['mult_op']
+    column = params['column']
+    print('RUN METHOD: params were ', mult_op, column)
     # now that we have all the data collected, run the R method
     r = robjects.r
     env = robjects.globalenv
     env['tree_file'] = '/tmp/tree_file.phy'
     env['table_file'] = '/tmp/table_file.csv'
+    env['mult_op'] = mult_op
+    env['column'] = column
     env['modelfit_summary_file'] = '/tmp/modelfile.csv'
     env['plot_file'] = '/tmp/plotfile.png'
     env['points_file'] = '/tmp/points_file.csv'
@@ -42,20 +47,47 @@ fac <- unique(as.vector(charMat))
 fac_start <- fac[1]
 fac_end <- tail(fac, 1)
 
-# Create phyDat object to ultimately create tree
-charMat_phyDat <- phyDat(as.matrix(charMat), type = "USER", levels = fac_start:fac_end)
+if(mult_op == "Yes"){
+    # Create tree using all characters
 
-# Create a starting tree
-tree_start <- random.addition(charMat_phyDat)
-# Use pratchet to create a maximum parsimony tree
-tree_mp <- pratchet(charMat_phyDat, start = tree_start,
-                    minit = 100, maxit = 1000,
-                    all = TRUE, trace = 0)
+    # Create phyDat object to ultimately create tree
+    charMat_phyDat <- phyDat(as.matrix(charMat), type = "USER", levels = fac_start:fac_end)
 
-# Root tree
-outgroup <- row.names(charMat)[1] # Assume outgroup is the first row
-tree_rooted <- root(tree_mp, outgroup = outgroup,
-                    resolve.root = TRUE, edgelabel = TRUE)
+    # Create a starting tree
+    tree_start <- random.addition(charMat_phyDat)
+    # Use pratchet to create a maximum parsimony tree
+    tree_mp <- pratchet(charMat_phyDat, start = tree_start,
+                        minit = 100, maxit = 1000,
+                        all = TRUE, trace = 0)
+
+    # Root tree
+    outgroup <- row.names(charMat)[1] # Assume outgroup is the first row
+    tree_rooted <- root(tree_mp, outgroup = outgroup,
+                        resolve.root = TRUE, edgelabel = TRUE)
+}
+
+if(mult_op == "No"){
+    # Create tree using just the chosen character
+
+    # Trim matrix to single out chosen character
+    selectedChar <- column
+    charMat <- charMat[,selectedChar]
+
+    # Create phyDat object to ultimately create tree
+    charMat_phyDat <- phyDat(as.matrix(charMat), type = "USER", levels = fac_start:fac_end)
+
+    # Create a starting tree
+    tree_start <- random.addition(charMat_phyDat)
+    # Use pratchet to create a maximum parsimony tree
+    tree_mp <- pratchet(charMat_phyDat, start = tree_start,
+                        minit = 100, maxit = 1000,
+                        all = TRUE, trace = 0)
+
+    # Root tree
+    outgroup <- names(charMat)[1] # For single character, assume outgroup is first row
+    tree_rooted <- root(tree_mp, outgroup = outgroup,
+                        resolve.root = TRUE, edgelabel = TRUE)
+}
 
 # Plot tree to png
 plotsize = 1000

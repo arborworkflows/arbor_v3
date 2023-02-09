@@ -68,6 +68,6 @@ def init(app):
     @app.post('/parsimony_tree/run')
     async def run(params : Request):
         params_obj =  await params.json()
-        print('run with testing:', params_obj['placeholder'])
+        print('run with column:', params_obj['column'])
         returnContent =  run_method(params_obj)
         return Response(content=returnContent, media_type='text/html')

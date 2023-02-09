@@ -28,19 +28,24 @@
               @change="uploadTable($event.target.files[0])"
             >
           </v-flex>
-          <!-- <v-flex xs12>
-            <v-btn class="text-none" outline block @click='$refs.treeFile.click()'>{{ treeFileName || 'UPLOAD TREE' }}</v-btn>
-            <input
-              type="file"
-              style="display: none"
-              ref="treeFile"
-              @change="uploadTree($event.target.files[0])"
-            >
-          </v-flex> 
+
           <v-flex xs12>
-            <v-select label="testing" v-model="placeholder" :items="placeholders" />
-          </v-flex>
-          -->
+            <v-radio-group v-model ="mult_op">
+              <v-radio
+                 label = "Create a tree using all characters"
+                 value = "Yes">
+              </v-radio>
+              <v-radio
+                 label = "Create a tree using ONE character (select in drop-down below)"
+                 value = "No">
+              </v-radio>
+             </v-radio-group>
+           </v-flex>
+
+           <v-flex xs12>
+             <v-select label="Column" v-model="selectedColumn" :items="columns" />
+           </v-flex>
+
         <br><br>
 	      <v-flex xs12>
             <v-btn
@@ -80,7 +85,11 @@
             <br><br>
             1. Upload your character matrix (.csv). This application assumes that the first column contains the tip labels, and the first row is the outgroup.
             <br><br>
-            2. Click GO.
+            2. Choose whether you would like to create your maximum parsimony tree using the whole character matrix (all characters), or just one column of the character matrix (one character).
+            <br><br>
+            3. If you would like to use just one character, use the dropdown to pick your character of interest. If you would like to use all characters, the dropdown will be ignored. IMPORTANT: if you do not choose a character when you've chosen to create a tree with one character, the application will not work and will display a pop-up that says "Sorry".
+            <br><br>
+            4. Click GO.
             <br><br>
             <br><br>
             Source cited: Schliep K.P. 2011. phangorn: phylogenetic analysis in R. Bioinformatics, 27(4) 592-593
@@ -132,8 +141,9 @@
     tableFileName: '',
     job: { status: 0 },
     running: false,
-    placeholders: ['bloop', 'blarp'],
-    placeholder: 'bloop',
+    mult_op: null,
+    columns: [],
+    selectedColumn: null,
     runCompleted: false,
     result: [],
     resultColumns: [],
@@ -149,7 +159,7 @@
   computed: {
     readyToRun() {
       return !!this.tableFileName &&
-      !!this.placeholder;
+      !!this.mult_op;
     },
 
     readyToDownload() {
@@ -192,7 +202,8 @@
               type: "POST",
               contentType: 'application/json',
               data: JSON.stringify({
-                placeholder: this.placeholder
+                mult_op: this.mult_op,
+                column: this.selectedColumn
               }),
               success: function(returnedData) {
                 var dataAsJSON = JSON.parse(returnedData)
