@@ -5,11 +5,12 @@
   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.js" rel="stylesheet">  -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <title>Fit Continuous</title>
 </head>
 
-<body>  
+<body>
   <div id="app">
     <v-app>
     <v-layout class="transform-view" row fill-height>
@@ -69,7 +70,7 @@
               :disabled="!readyToDownload"
               @click="downloadResults"
             >
-              Download Model Results 
+              Download Model Results
             </v-btn>
           </v-flex>
         </v-container>
@@ -83,59 +84,70 @@
               <br><br>
               1. Upload your table (.csv) and tree (Newick, .phy). Note: tables are assumed to have species names as row names.
               <br><br>
-              2. Select the desired column to run fitContinuous on. 
+              2. Select the desired column to run fitContinuous on.
               <br><br>
-	      3. Select the desired Model and input your standard error.
-	      <br>
-	      Models include:
-	      <br>
- 	      <ul>
-		<li>BM (Brownian Motion)</li> 
-		<li>OU (Ornstein-Uhlenbeck)</li>
-		<li>EB (Early-Burst)</li>
-		<li>rate_trend (diffusion model with linear trend in rates through time)</li>
-		<li>lambda (one of the Pagel (1999) models that fits the extent to which the phylogeny predicts covariance among trait values for species)</li>
-		<li>kappa (character divergence is related to the number of speciation events between two species)</li>
-		<li>delta (time-dependent model of trait evolution)</li>
-		<li>mean_trend (sensible only for non-ultrametric trees; directional drift/trend toward smaller or larger values through time)</li>
-		<li>white (white-noise)</li>
-	      </ul>
-	      <br>
-              4. Click GO.
+              3. Select the desired Model and input your standard error.
+              <br>
+              Models include:
+              <br>
+                <ul>
+                  <li>BM (Brownian Motion)</li>
+                  <li>OU (Ornstein-Uhlenbeck)</li>
+                  <li>EB (Early-Burst)</li>
+                  <li>rate_trend (diffusion model with linear trend in rates through time)</li>
+                  <li>lambda (one of the Pagel (1999) models that fits the extent to which the phylogeny predicts covariance among trait values for species)</li>
+                  <li>kappa (character divergence is related to the number of speciation events between two species)</li>
+                  <li>delta (time-dependent model of trait evolution)</li>
+                  <li>mean_trend (sensible only for non-ultrametric trees; directional drift/trend toward smaller or larger values through time)</li>
+                  <li>white (white-noise)</li>
+                </ul>
+              <br>
+                    4. Click GO.
+                    <br><br>
               <br><br>
-	      <br><br>
-	      Sources cited: Pagel M. 1999. Inferring the historical patterns of biological evolution. Nature 401: 877-884.
-	      <br>
-	      Pennel, M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
-             
-	    </v-card-text>
-          </v-card>
-          <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
-            <v-card-text>{{ tableFileName }}</v-card-text>
-            <json-data-table :data="table" />
-          </v-card>
-        <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
-          Running (Job Status {{ job.status }}) ...
-        </div>
-        <code v-if="!running && job.status === 4" class="mb-4 ml-4 mr-4" style="width: 100%">{{ job.log.join('\n') }}</code>
-        <template v-if="!running && job.status === 3">
+              Sources cited: Pagel M. 1999. Inferring the historical patterns of biological evolution. Nature 401: 877-884.
+              <br>
+              Pennel, M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
 
-	  <v-card class ="mb-4 ml-4 mr-4">
-	    <v-card-text>
-		<b>Maximum-Likelihood Estimate:</b>
-		<br></br>
-		{{ this.result[0]["lnL"] }}
-	    </v-card-text>
-	  </v-card>
-          <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
-            <v-card-text>Result summary</v-card-text>
-            <json-data-table :data="result" hide-actions/>
+            </v-card-text>
           </v-card>
-	  <v-card class ="mb-4 ml-4 mr-4">
-	     <v-card-text>Phenogram Plot</v-card-text>
-	     <img :src="plotUrl" style="display: block; margin: auto">
-	     </v-card>
-        </template>
+
+        <div xs12 class="text-xs-center mb-4 ml-4 mr-4">
+
+          <!-- <template v-if="runCompleted">  -->
+
+            <v-card class ="mb-4 ml-4 mr-4">
+              <v-card-text>
+            <b>Maximum-Likelihood Estimate:</b>
+            <br></br>
+            lnL: {{ result.lnL }}
+            <br></br>
+            aic: {{ result.aic }}
+              </v-card-text>
+            </v-card>
+                  <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
+                    <v-card-text>Result summary</v-card-text>
+                      <table id="resultTable" class="display" width="100%"></table>
+                  </v-card>
+            <v-card class ="mb-4 ml-4 mr-4">
+              <v-card-text>Phenogram Plot</v-card-text>
+              <div ref="phenogram"></div>
+              </v-card>
+
+              <!--
+              <v-card class ="mb-4 ml-4 mr-4">
+                <v-card-text>Tree Plot</v-card-text>
+                <div ref="jsontree"></div>
+                </v-card>
+
+              <v-card class ="mb-4 ml-4 mr-4">
+                <v-card-text>Tree Plot</v-card-text>
+                <div ref="squaretree"></div>
+                </v-card>
+              -->
+
+          <!-- </template> -->
+        </div>
       </v-layout>
     </v-layout>
   </v-app>
@@ -143,12 +155,28 @@
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-<script>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.21.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-dsv@3"></script>
+
+
+    <script>
+
+//import JsonDataTable from '../components/JsonDataTable.vue';
+//app.component('json-data-table', MyComponent)
+
+//
+//  this.result = csvParse((await this.girderRest.get(`item/${resultSummaryItem._id}/download`)).data);
+//this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
+
+
   new Vue({
       el: '#app',
       vuetify: new Vuetify(),
+
   data: () => ({
     tableFile: {},
     table: [],
@@ -157,14 +185,18 @@
     treeFileName: '',
     job: { status: 0 },
     running: false,
+    runCompleted: false,
     columns: [],
     selectedColumn: null,
     models:['BM','OU','EB','rate_trend','lambda','kappa','delta','mean_trend','white'],
     selectedModel: '',
     stdError: '',
     result: [],
+    lnL: 0,
     resultColumns: [],
     plotUrl: '',
+
+
   }),
   asyncComputed: {
     scratchFolder() {
@@ -181,83 +213,414 @@
     },
 
     readyToDownload() {
-      return (this.result.length>0 && !this.running && this.job.status===3)
+      return (this.result && !this.running && this.runCompleted)
     },
 
   },
   methods: {
+
+    // thanks to: https://thegermancoder.com/2018/11/29/how-to-parse-csv-with-javascript/
+    CSVToArray(strData) {
+      let lines = strData.split(/(?:\r\n|\n)+/).filter(function(el) {return el.length != 0});
+      let headers = lines.splice(0, 1)[0].split(",");
+      let valuesRegExp = /(?:\"([^\"]*(?:\"\"[^\"]*)*)\")|([^\",]+)/g;
+      let elements = [];
+      for (let i = 0; i < lines.length; i++) {
+          let element = {};
+          let j = 0;
+          while (matches = valuesRegExp.exec(lines[i])) {
+              var value = matches[1] || matches[2];
+              value = value.replace(/\"\"/g, "\"");
+              element[headers[j]] = value;
+              j++;
+          }
+          elements.push(element);
+      }
+      return elements
+    },
+
+
+
     async run() {
       this.running = true;
       this.errorLog = null;
- 
+      // we need to do this because 'this' becomes undefined inside the callback
+      var that = this
 
-      if (this.job.status === 3) {
-        this.running = false;
-        this.result = csvParse((await this.girderRest.get(`item/${resultSummaryItem._id}/download`)).data);
-        this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
-        this.plotUrl = `${this.girderRest.apiRoot}/item/${plotItem._id}/download`;
-      }
-      if (this.job.status === 4) {
-        this.running = false;
-      }
+      jQuery.ajax({
+              url: '/fit_continuous/run',
+              type: "POST",
+              contentType: 'application/json',
+              data: JSON.stringify({
+                column: this.selectedColumn,
+                model: this.selectedModel,
+                stdError: this.stdError
+              }),
+              success: function(returnedData) {
+                var dataAsJSON = JSON.parse(returnedData)
+                console.log('content returned:',dataAsJSON)
+                // use the temporay that we initialized above
+                that.result = dataAsJSON
+                that.lnL = dataAsJSON["lnL"]
+                that.runCompleted = true
+                // Kristen: other variables here
+                that.running = false
+                that.renderTheSpec(that)
+                that.renderPrettyJsonTree(that)
+                that.renderSquareTree(that)
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+                this.runCompleted = true
+                this.running = false
+
+              }
+          });
     },
+
+
     async uploadTable(file) {
+      console.log('uploadTable in fit_continuous was called')
+
       if (file) {
         this.tableFileName = file.name;
-        const uploader = new utils.Upload(file, {$rest: this.girderRest, parent: this.scratchFolder}); 
-        this.tableFile = await uploader.start();
         const reader = new FileReader();
         reader.addEventListener('loadend', e => {
           const text = e.srcElement.result;
-          this.table = csvParse(text);
-          this.columns = csvParse(text).columns;
+          //this.table = this.CSVToArray(text);
+          this.table = d3.csvParse(text)
+          this.columns = this.table.columns
+
+          // pass the table data to the server backend
+          jQuery.ajax({
+              url: '/fit_continuous/table_upload',
+              type: "POST",
+              contentType: 'application/json',
+              data: JSON.stringify({
+                table: this.table
+              }),
+              success: function(data){
+                console.log(data)
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+              }
+          });
         });
         reader.readAsText(file);
       }
     },
+
+
     async uploadTree(file) {
+      console.log('uploadTree in fit_continuous')
+
       if (file) {
         this.treeFileName = file.name;
-        const uploader = new utils.Upload(file, {$rest: this.girderRest,  parent: this.scratchFolder});
-        this.treeFile = await uploader.start();
-      }
-    },
+        const reader = new FileReader();
+        reader.addEventListener('loadend', e => {
+          const text = e.srcElement.result;
+          this.tree = text;
+          console.log('Read tree file content!!');
 
-
-    async downloadResults() {
-	// iterate through the first row to find the column names
-        var csvOutput = ''
-	for (var key in this.result[0]) {
-	  csvOutput += key+','
-	} 
-        csvOutput += "\n";
-
-        this.result.forEach(function(row) {
-		for (var key in row) {
-    		// check if the property/key is defined in the object itself, not in parent
-    		if (row.hasOwnProperty(key)) {           
-        			//console.log(key, row[key]);
-				csvOutput += row[key]+','
-    			}
-		}
-            csvOutput += "\n";
+          // pass the tree file as a string to the server
+          jQuery.ajax({
+              url: '/fit_continuous/tree_upload',
+              type: "POST",
+              //processData: false,
+              contentType: 'application/json',
+              data: JSON.stringify({
+                tree: this.tree
+              }),
+              success: function(data){
+                console.log('success!!')
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+              }
+          });
         });
- 
-	// the csv seems to be created correctly
-        //console.log(csvOutput);
-	//csvOutput = JSON.stringify(csvOutput)
-	console.log(csvOutput.split(0,50))
-        const url = window.URL.createObjectURL(new Blob([csvOutput]));
-	console.log("url:",url)
-	// this is an old but still normal way to download a file, attach it to an 
-	// <a> tag and click the link.  We then remove the tag after downloaing. 
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'model_results.csv') //or any other extension;
-        document.body.appendChild(link);
-        link.click();
-	document.body.removeChild(link);
+        reader.readAsText(file);
+      };
     },
+
+    async renderTheSpec(that) {
+
+      var spec = {
+
+          title: "Fit Continuous Result",
+          width: 1200,
+          height: 800,
+          layer: [
+            {data: {values: that.result.points, format:{type: "json"}},
+            params: [{
+              name: "grid",
+              select: "interval",
+              bind: "scales"
+            }],
+            mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
+            encoding: {
+              x: {field: "Node_x_coord", type: "quantitative",
+              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
+              y: {field: "Node_y_coord", type: "quantitative",
+              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
+              }
+            },
+            {data: {values: that.result.points, format:{type: "json"}},
+            params: [{
+              name: "grid_2",
+              select: "interval",
+              bind: "scales"
+            }],
+            mark: {type:"text", fill: "#000000", align: {expr:"datum.Node_x_coord"}, dx: {expr:10}},
+            encoding: {
+              x: {field: "Node_x_coord", type: "quantitative"},
+              y: {field: "Node_y_coord", type: "quantitative"},
+              text: {field: "Species", type: "ordinal"},
+              }
+            },
+            {data: {values: that.result.connections, format:{type: "json"}},
+            mark: {type:"rule", color:"darkgreen", strokeWidth:1, tooltip: {content: "data"}},
+            encoding: {
+              x: {field: "V1_x", type: "quantitative"},
+              x2: {field: "V2_x", type: "quantitative"},
+              y: {field: "V1_y", type: "quantitative"},
+              y2: {field: "V2_y", type: "quantitative"},
+              }
+            }
+          ]
+          };
+
+          vegaEmbed(that.$refs.phenogram, spec);
+        },
+
+
+    async renderPrettyJsonTree(that) {
+
+        var spec = {
+
+        title: "Fit Continuous Result",
+        width: 1200,
+        height: 800,
+        $schema: "https://vega.github.io/schema/vega/v5.json",
+        description: "An example of Cartesian layouts for a node-link diagram of hierarchical data.",
+
+      padding: 5,
+
+      signals: [
+        {
+          name: "labels", value: true,
+          bind: {input: "checkbox"}
+        },
+        {
+          name: "layout", value: "tidy",
+          bind: {input: "radio", options: ["tidy", "cluster"]}
+        },
+        {
+          name: "links", value: "diagonal",
+          bind: {
+            input: "select",
+            options: ["line", "curve", "diagonal", "orthogonal"]
+          }
+        },
+        {
+          name: "separation", value: false,
+          bind: {input: "checkbox"}
+        }
+      ],
+
+      data: [
+        {
+          name: "tree",
+          values: this.result['jsonTree']['values'],
+          transform: [
+                {
+                  type: "stratify",
+                  key: "id",
+                  parentKey: "parent"
+                },
+                {
+                  type: "tree",
+                  method: {signal: "layout"},
+                  size: [{signal: "height"}, {signal: "width - 100"}],
+                  separation: {signal: "separation"},
+                  as: ["y", "x", "depth", "children"]
+                }
+              ]
+            },
+            {
+              name: "links",
+              source: "tree",
+              transform: [
+                { type: "treelinks" },
+                {
+                  type: "linkpath",
+                  orient: "horizontal",
+                  shape: {signal: "links"}
+                }
+              ]
+            }
+          ],
+
+      scales: [
+        {
+          name: "color",
+          type: "linear",
+          range: {"scheme": "magma"},
+          domain: {"data": "tree", "field": "depth"},
+          zero: true
+        }
+      ],
+
+      marks: [
+        {
+          type: "path",
+          from: {"data": "links"},
+          encode: {
+            update: {
+              path: {"field": "path"},
+              stroke: {"value": "#ccc"}
+            }
+          }
+        },
+        {
+          type: "symbol",
+          from: {"data": "tree"},
+          encode: {
+            enter: {
+              size: {"value": 100},
+              stroke: {"value": "#fff"}
+            },
+            update: {
+              x: {field: "x"},
+              y: {field: "y"},
+              fill: {scale: "color", field: "depth"}
+            }
+          }
+        },
+        {
+          type: "text",
+          from: {data: "tree"},
+          encode: {
+            enter: {
+              text: {field: "name"},
+              fontSize: {value: 9},
+              baseline: {value: "middle"}
+            },
+            update: {
+              x: {field: "x"},
+              y: {field: "y"},
+              dx: {signal: "datum.children ? -7 : 7"},
+              align: {signal: "datum.children ? 'right' : 'left'"},
+              opacity: {signal: "labels ? 1 : 0"}
+            }
+          }
+        }
+      ]
+    }
+
+    vegaEmbed(that.$refs.jsontree, spec);
+  },
+
+  async squareTreeRender(that) {
+
+    var spec = {
+
+        title: "Fit Continuous Result",
+        width: 1200,
+        height: 800,
+        layer: [
+          {data: {values: that.result.points, format:{type: "json"}},
+          params: [{
+            name: "grid",
+            select: "interval",
+            bind: "scales"
+          }],
+          mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
+          encoding: {
+            x: {field: "Node_x_coord", type: "quantitative", axis: {grid: false},},
+            y: {field: "Node_y_coord", type: "quantitative", axis: {grid: false},},
+            }
+          },
+          {data: {values: that.result.points, format:{type: "json"}},
+          params: [{
+            name: "grid_2",
+            select: "interval",
+            bind: "scales"
+          }],
+          mark: {type:"text", fill: "#000000", align: {expr:"datum.Node_x_coord"}, dx: {expr:10}},
+          encoding: {
+            x: {field: "Node_x_coord", type: "quantitative"},
+            y: {field: "Node_y_coord", type: "quantitative"},
+            text: {field: "Species", type: "ordinal"},
+            }
+          },
+          {data: {values: that.result.connections, format:{type: "json"}},
+          mark: {type:"rule", color:"darkgreen", strokeWidth:1.0, tooltip: {content: "data"}},
+          encoding: {
+            x: {field: "V1_x", type: "quantitative"},
+            x2: {field: "V1_x", type: "quantitative"},
+            y: {field: "V1_y", type: "quantitative"},
+            y2: {field: "V2_y", type: "quantitative"},
+            }
+          },
+          {data: {values: that.result.connections, format:{type: "json"}},
+          mark: {type:"rule", color:"darkgreen", strokeWidth:1.0, tooltip: {content: "data"}},
+          encoding: {
+            x: {field: "V1_x", type: "quantitative"},
+            x2: {field: "V2_x", type: "quantitative"},
+            y: {field: "V2_y", type: "quantitative"},
+            y2: {field: "V2_y", type: "quantitative"}
+            }
+          },
+        ]
+        };
+
+        vegaEmbed(that.$refs.squaretree, spec);
+      },
+
+
+
+        downloadResults() {
+          console.log('trying to buld csv and download')
+          // iterate through the first row to find the column names
+          var csvOutput = ''
+          // print the title line
+          for (const key in this.result) {
+            if ((key != 'points') && (key != 'connections')) {
+            csvOutput += key+','
+            }
+          }
+          // ToDo: would be best to strip off the last comma here
+          csvOutput += '\n'
+
+          // print out the values
+          for (const key in this.result) {
+            if ((key != 'points') && (key != 'connections')) {
+            csvOutput += this.result[key]+','
+            }
+          }
+          // ToDo: would be best to strip off the last comma here
+          csvOutput += '\n'
+
+          // the csvOutput has been created as a string, now attach it to an
+          // HTML element in the window and click "download" on that element
+          // the local filename will be called whatever we use in the setAttribute
+          // call, currently it is "model_results.csv"
+          console.log(csvOutput)
+          const url = window.URL.createObjectURL(new Blob([csvOutput]));
+          console.log("url:",url)
+          // this is an old but still normal way to download a file, attach it to an
+          // <a> tag and click the link. We then remove the tag after downloaing.
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'model_results.csv') //or any other extension;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        },
 
   }
 })

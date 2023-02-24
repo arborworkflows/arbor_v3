@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.js" rel="stylesheet">  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>Fit Discrete</title>
+</head>
+
+<body>
+  <div id="app">
+    <v-app>
+    <v-layout class="transform-view" row fill-height>
+      <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
+        <v-toolbar dark flat color="primary">
+          <v-toolbar-title class="white--text">Fit Discrete</v-toolbar-title>
+        </v-toolbar>
+        <v-container fluid>
+          <v-flex xs12>
+            <v-btn class="text-none" outline block @click='$refs.tableFile.click()'>{{ tableFileName || 'UPLOAD TABLE' }}</v-btn>
+            <input
+              type="file"
+              style="display: none"
+              ref="tableFile"
+              @change="uploadTable($event.target.files[0])"
+            >
+          </v-flex>
+          <v-flex xs12>
+            <v-btn class="text-none" outline block @click='$refs.treeFile.click()'>{{ treeFileName || 'UPLOAD TREE' }}</v-btn>
+            <input
+              type="file"
+              style="display: none"
+              ref="treeFile"
+              @change="uploadTree($event.target.files[0])"
+            >
+          </v-flex>
+          <v-flex xs12>
+            <v-select label="Column" v-model="selectedColumn" :items="columns" />
+          </v-flex>
+          <v-flex xs12>
+            <v-select label="Select Model"  v-model="selectedModel" :items="models" />
+          </v-flex>
+	        <v-flex xs12>
+            <v-select label="Select a Transformation" v-model="selectedTransformation" :items="transformation" />
+      	  </v-flex>
+	  <v-flex xs12>
+            <v-btn
+              block
+              :class="{ primary: readyToRun }"
+              :flat="readyToRun"
+              :outline="!readyToRun"
+              :disabled="!readyToRun"
+              @click="run"
+            >
+              Go
+            </v-btn>
+          </v-flex>
+        </v-container>
+
+        <v-container fluid>
+         <v-flex xs12>
+            <v-btn
+              block
+              :class="{ primary: readyToDownload }"
+              :flat="readyToDownload"
+              :outline="!readyToDownload"
+              :disabled="!readyToDownload"
+              @click="downloadResults"
+            >
+              Download Model Results
+            </v-btn>
+          </v-flex>
+        </v-container>
+
+
+      </v-navigation-drawer>
+      <v-layout column justify-start fill-height style="margin-left: 400px">
+          <v-card class="ma-4">
+            <v-card-text>
+            <b>FitDiscrete</b> is an app that runs the fitDiscrete function in the R package geiger (Pennell et al., 2014). This function fits various likelihood models for discrete character evolution. It returns parameter estimates and a maximum likelihood estimate.
+            <br><br>
+            1. Upload your table (.csv) and tree (Newick, .phy).
+            <br><br>
+            2. Select the desired column to run fitDiscrete on.
+            <br><br>
+            3. Select the desired Model and Transformation.
+            <br>
+            Models include:
+            <br>
+            <ul>
+              <li>ER (Equal-Rates)</li>
+              <li>SYM (Symmetric)</li>
+              <li>ARD (All Rates Different)</li>
+              <li>meristic (transitions occur in a stepwise fashion without skipping intermediate steps)</li>
+            </ul>
+            <br>
+            Transformations include:
+            <br>
+            <ul>
+              <li>none (rate constancy)</li>
+              <li>EB (Early-burst)</li>
+              <li>lambda (transforms the tree so that lambda values near 0 cause the phylogeny to become more star-like, and a lambda value of 1 recovers the "none" model)</li>
+              <li>kappa (raises all branch lengths to an estimated power (kappa))</li>
+              <li>delta (raises all node depths to an estimated power (delta))</li>
+              <li>white (white-noise)</li>
+            </ul>
+            <br>
+            4. Click GO.
+            <br><br>
+            <br><br>
+            Source cited: Pennel, M.W., J.M. Eastman, G.J. Slater, J.W. Brown, J.C. Uyeda, R.G. FitzJohn, M.E. Alfaro, & L.J. Harmon. 2014. geiger v2.0: an expanded suite of methods for fitting macroevolutionary models to phylogenetic trees. Bioinformatics 30: 2216-2218.
+            </v-card-text>
+          </v-card>
+
+        <div xs12 class="text-xs-center mb-4 ml-4 mr-4">
+          <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
+            <v-card-text>Result summary</v-card-text>
+              <table id="resultTable" class="display" width="100%"></table>
+          </v-card>
+          <v-card class ="mb-4 ml-4 mr-4">
+            <v-card-text>Model Plot</v-card-text>
+            <div ref="model_plot"></div>
+          </v-card>
+        </div>
+      </v-layout>
+    </v-layout>
+  </v-app>
+  </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.21.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-dsv@3"></script>
+
+
+    <script>
+
+//import JsonDataTable from '../components/JsonDataTable.vue';
+//app.component('json-data-table', MyComponent)
+
+//
+//  this.result = csvParse((await this.girderRest.get(`item/${resultSummaryItem._id}/download`)).data);
+//this.resultColumns = this.result.columns.map(d => ({text: d, value: d, sortable: false}));
+
+
+  new Vue({
+      el: '#app',
+      vuetify: new Vuetify(),
+
+  data: () => ({
+    tableFile: {},
+    table: [],
+    treeFile: {},
+    tableFileName: '',
+    treeFileName: '',
+    job: { status: 0 },
+    running: false,
+    runCompleted: false,
+    columns: [],
+    selectedColumn: null,
+    models:['ER','SYM','ARD','meristic'],
+    selectedModel: '',
+    transformation: ['none','EB','lambda','kappa','delta','white'],
+    selectedTransformation: '',
+    result: [],
+    resultColumns: [],
+    plotUrl: '',
+
+
+  }),
+  asyncComputed: {
+    scratchFolder() {
+      return scratchFolder(this.girderRest);
+    },
+  },
+  computed: {
+    readyToRun() {
+      return !!this.treeFileName &&
+        !!this.tableFileName &&
+        !!this.selectedColumn &&
+        !!this.selectedModel &&
+	      !!this.selectedTransformation;
+    },
+
+    readyToDownload() {
+      return (this.result && !this.running && this.runCompleted)
+    },
+
+  },
+  methods: {
+
+    // thanks to: https://thegermancoder.com/2018/11/29/how-to-parse-csv-with-javascript/
+    CSVToArray(strData) {
+      let lines = strData.split(/(?:\r\n|\n)+/).filter(function(el) {return el.length != 0});
+      let headers = lines.splice(0, 1)[0].split(",");
+      let valuesRegExp = /(?:\"([^\"]*(?:\"\"[^\"]*)*)\")|([^\",]+)/g;
+      let elements = [];
+      for (let i = 0; i < lines.length; i++) {
+          let element = {};
+          let j = 0;
+          while (matches = valuesRegExp.exec(lines[i])) {
+              var value = matches[1] || matches[2];
+              value = value.replace(/\"\"/g, "\"");
+              element[headers[j]] = value;
+              j++;
+          }
+          elements.push(element);
+      }
+      return elements
+    },
+
+
+
+    async run() {
+      this.running = true;
+      this.errorLog = null;
+      // we need to do this because 'this' becomes undefined inside the callback
+      var that = this
+
+      jQuery.ajax({
+              url: '/fit_discrete/run',
+              type: "POST",
+              contentType: 'application/json',
+              data: JSON.stringify({
+                column: this.selectedColumn,
+                model: this.selectedModel,
+                transform: this.selectedTransformation
+              }),
+              success: function(returnedData) {
+                var dataAsJSON = JSON.parse(returnedData)
+                console.log('content returned:',dataAsJSON)
+                // use the temporay that we initialized above
+                that.result = dataAsJSON
+                that.runCompleted = true
+                // Kristen: other variables here
+                that.running = false
+                that.renderTheSpec(that)
+
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+                this.runCompleted = true
+                this.running = false
+
+              }
+          });
+    },
+
+
+    async uploadTable(file) {
+      console.log('uploadTable in fit_discrete was called')
+
+      if (file) {
+        this.tableFileName = file.name;
+        const reader = new FileReader();
+        reader.addEventListener('loadend', e => {
+          const text = e.srcElement.result;
+          //this.table = this.CSVToArray(text);
+          this.table = d3.csvParse(text)
+          this.columns = this.table.columns
+
+          // pass the table data to the server backend
+          jQuery.ajax({
+              url: '/fit_discrete/table_upload',
+              type: "POST",
+              contentType: 'application/json',
+              data: JSON.stringify({
+                table: this.table
+              }),
+              success: function(data){
+                console.log(data)
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+              }
+          });
+        });
+        reader.readAsText(file);
+      }
+    },
+
+
+    async uploadTree(file) {
+      console.log('uploadTree in fit_discrete')
+
+      if (file) {
+        this.treeFileName = file.name;
+        const reader = new FileReader();
+        reader.addEventListener('loadend', e => {
+          const text = e.srcElement.result;
+          this.tree = text;
+          console.log('Read tree file content!!');
+
+          // pass the tree file as a string to the server
+          jQuery.ajax({
+              url: '/fit_discrete/tree_upload',
+              type: "POST",
+              //processData: false,
+              contentType: 'application/json',
+              data: JSON.stringify({
+                tree: this.tree
+              }),
+              success: function(data){
+                console.log('success!!')
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+              }
+          });
+        });
+        reader.readAsText(file);
+      };
+    },
+
+    async renderTheSpec(that) {
+
+      var spec = {
+
+          title: "Fit Discrete Result",
+          width: 900,
+          height: 900,
+          layer: [
+            {data: {values: that.result.points, format:{type: "json"}},
+            params: [{
+              name: "grid",
+              select: "interval",
+              bind: "scales"
+            }],
+            mark: {type:"point", fill: "#4C78A8"},
+            encoding: {
+              x: {field: "x", type: "quantitative",
+              axis: {labelFontSize:0, domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
+              y: {field: "y", type: "quantitative",
+              axis: {labelFontSize:0, domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
+              }
+            },
+            {data: {values: that.result.points, format:{type: "json"}},
+            params: [{
+              name: "grid_2",
+              select: "interval",
+              bind: "scales"
+            }],
+            mark: {type:"text", fill: "#000000", align: {expr:"datum.x"}, dx: {expr:10}},
+            encoding: {
+              x: {field: "x", type: "quantitative"},
+              y: {field: "y", type: "quantitative"},
+              text: {field: "alpha_names", type: "ordinal"},
+              }
+            },
+            {data: {values: that.result.graph, format:{type: "json"}},
+            mark: {type:"rule", color:"darkgreen", strokeWidth:1},
+            encoding: {
+              x: {field: "x1", type: "quantitative"},
+              x2: {field: "x2", type: "quantitative"},
+              y: {field: "y1", type: "quantitative"},
+              y2: {field: "y2", type: "quantitative"},
+              },
+
+            },
+            {data: {values: that.result.graph, format:{type: "json"}},
+            mark: {type:"text", color:"blue", "dy": {"expr": 10}},
+            encoding: {
+              x: {field: "midpoint_x", type: "quantitative"},
+              y: {field: "midpoint_y", type: "quantitative"},
+              text: {field: "transrate", type: "quantitative"},
+              },
+
+            }
+          ]
+          };
+          vegaEmbed(that.$refs.model_plot, spec);
+        },
+
+
+
+        downloadResults() {
+          console.log('trying to buld csv and download')
+          // iterate through the first row to find the column names
+          console.log('this.result',this.result)
+          console.log('the props are:')
+          for (const prop in this.result) {
+            console.log(prop)
+          }
+          var csvOutput = ''
+          // print the title line
+          // exclude the graph objects
+          for (const key in this.result) {
+            if ((key != 'points') && (key != 'connections') && (key != 'graph')) {
+            csvOutput += key+','
+            }
+          }
+          // ToDo: would be best to strip off the last comma here
+          csvOutput += '\n'
+
+          // print out the values
+          // exclude the graph objects
+          for (const key in this.result) {
+            if ((key != 'points') && (key != 'connections') && (key != 'graph')) {
+            csvOutput += this.result[key]+','
+            }
+          }
+          // ToDo: would be best to strip off the last comma here
+          csvOutput += '\n'
+
+          // the csvOutput has been created as a string, now attach it to an
+          // HTML element in the window and click "download" on that element
+          // the local filename will be called whatever we use in the setAttribute
+          // call, currently it is "model_results.csv"
+          console.log(csvOutput)
+          const url = window.URL.createObjectURL(new Blob([csvOutput]));
+          console.log("url:",url)
+          // this is an old but still normal way to download a file, attach it to an
+          // <a> tag and click the link. We then remove the tag after downloaing.
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', 'model_results.csv') //or any other extension;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        },
+
+  }
+})
+</script>
+</body>
+</html>

@@ -42,7 +42,10 @@
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
+
+
   <script>
+
     new Vue({
       el: '#app',
       vuetify: new Vuetify(),
@@ -50,34 +53,40 @@
         return {
           apps: [
             {
-              name: 'Explore Season4 Sensor Collected Traits',
-              description: 'Provide a day-by-day exploration of trait values across all cultivars',
-              url: '/trait_explorer',
-              image: '/static/trait_explorer.png',
-            },
-            {
               name: 'Fit Continuous Variable Traits',
-              description: 'Luke to provide a pithy saying here',
+              description: 'Fit a model to continuous character values',
               url: '/fit_continuous',
               image: '/static/fitContinuous_app.png',
             },
             {
-              name: 'Fit Discrete Variable Traits',
-              description: 'Luke to provide another pithy saying',
-              url: '/fit_discrete',
-              image: '/static/fitDiscrete_app.png',
-            },
-            {
               name: 'Phylosignal',
-              description: 'Search for Phylosignal given a tree and a matrix',
+              description: 'Search for phylogenetic signal, given a tree and a matrix',
               url: '/phylosignal',
               image: '/static/phylosignal_app.png',
             },
             {
               name: 'Ancestral State Reconstruction',
-              description: 'SExplore the ancestral signal of a particular trait across the tree',
+              description: 'Explore the ancestral signal of a particular trait across the tree',
               url: '/asr',
               image: '/static/asr.png',
+            },
+            {
+              name: 'PIC',
+              description: 'Phylogenetic Independent Contrasts',
+              url: '/pic',
+              image: '/static/pic_app.png',
+            },
+            {
+              name: 'Fit Discrete Variable Traits',
+              description: 'Fit a model to discrete character values',
+              url: '/fit_discrete',
+              image: '/static/fitDiscrete_app.png',
+            },
+            {
+              name: 'Parsimony Tree',
+              description: 'Use a character matrix to make a maximum parsimony tree',
+              url: '/parsimony_tree',
+              image: '/static/parsimonyTree.PNG',
             },
           ],
         };

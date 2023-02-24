@@ -2,8 +2,7 @@ from fastapi import Response
 from fastapi import Request
 import pandas as pd
 from tempfile import NamedTemporaryFile
-#from fit_continuous.methods import table_upload
-from fit_continuous.methods import *
+from phylosignal.methods import *
 import rpy2
 from rpy2 import robjects
 import json
@@ -34,8 +33,8 @@ def store_the_tree(tree):
 
 def init(app):
 
-    # @app.get('/api/fit_continuous/')
-    # def fit_continuous(
+    # @app.get('/api/pic/')
+    # def pic(
     #     tree_file : str,
     #     table_file : str,
     #     selectedColumn : str,
@@ -55,16 +54,16 @@ def init(app):
     # 5. in Javascript, make a Vega chart(s)
 
     # this is the method that generates the single page for the app
-    @app.get('/fit_continuous')
+    @app.get('/phylosignal')
     def index():
-        with open('fit_continuous/index.html') as indexFile:
+        with open('phylosignal/index.html') as indexFile:
             indexContent = indexFile.read()
 
         testRInterface()
         return Response(content=indexContent, media_type='text/html')
 
     # upload a CSV table to the server for use later
-    @app.post('/fit_continuous/table_upload')
+    @app.post('/phylosignal/table_upload')
     async def table_upload(table : Request):
         json_table =  await table.json()
         print('received uploaded table:',json_table)
@@ -75,7 +74,7 @@ def init(app):
         return Response(content=returnContent, media_type='text/html')
 
     # upload a tree file in PHY format for use later
-    @app.post('/fit_continuous/tree_upload')
+    @app.post('/phylosignal/tree_upload')
     async def tree_upload(tree : Request):
         tree_obj =  await tree.json()
         print('received uploaded tree:',tree_obj['tree'])
@@ -86,12 +85,12 @@ def init(app):
         return Response(content=returnContent, media_type='text/html')
 
     # run the method on the previously uploaded tree and table
-    @app.post('/fit_continuous/run')
+    @app.post('/phylosignal/run')
     async def run(params : Request):
         params_obj =  await params.json()
         print('run with column:',params_obj['column'])
-        print('run with model',params_obj['model'])
-        print('run with stdError:',params_obj['stdError'])
+        print('run with model',params_obj['selModel'])
+        print('run with discrete model:',params_obj['disModel'])
         returnContent =  run_method(params_obj)
         return Response(content=returnContent, media_type='text/html')
         #return await Response(content=json.dumps(run(params_obj)),media_type='text/html')

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.js" rel="stylesheet">  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <title>Phylogentic Signal</title>
+</head>
+
+<body>
+  <div id="app">
+    <v-app>
+      <v-layout class="transform-view" row fill-height>
+        <v-navigation-drawer permanent fixed style="width: 400px; min-width: 400px;">
+          <v-toolbar dark flat color="primary">
+            <v-toolbar-title class="white--text">Phylogenetic Signal</v-toolbar-title>
+          </v-toolbar>
+          <v-container fluid>
+            <v-flex xs12>
+              <v-btn class="text-none" outline block @click='$refs.tableFile.click()'>{{ tableFileName || 'UPLOAD TABLE' }}</v-btn>
+              <input
+                type="file"
+                style="display: none"
+                ref="tableFile"
+                @change="uploadTable($event.target.files[0])"
+              >
+            </v-flex>
+            <v-flex xs12>
+              <v-btn class="text-none" outline block @click='$refs.treeFile.click()'>{{ treeFileName || 'UPLOAD TREE' }}</v-btn>
+              <input
+                type="file"
+                style="display: none"
+                ref="treeFile"
+                @change="uploadTree($event.target.files[0])"
+              >
+            </v-flex>
+            <v-flex xs12>
+              <v-select label="Select a Column to use for the model" v-model="selectedColumn" :items="columns" />
+            </v-flex>
+            <v-flex xs12>
+              <v-select label="Select the Model method" v-model="selectedModel" :items="models" />
+            </v-flex>
+  	  <v-flex xs12>
+  	    <v-select label="Select the Discrete model type (ignored if Continuous)" v-model="selectedDiscrete" :items="discreteModels" />
+            </v-flex>
+  	    <v-flex xs12>
+              <v-btn
+                block
+                :class="{ primary: readyToRun }"
+                :flat="readyToRun"
+                :outline="!readyToRun"
+                :disabled="!readyToRun"
+                @click="run"
+              >
+                Go
+              </v-btn>
+            </v-flex>
+          </v-container>
+
+          <v-container fluid>
+           <v-flex xs12>
+              <v-btn
+                block
+                :class="{ primary: readyToDownload }"
+                :flat="readyToDownload"
+                :outline="!readyToDownload"
+                :disabled="!readyToDownload"
+                @click="downloadResults"
+              >
+                Download Model Results
+              </v-btn>
+           </v-flex>
+        </v-container>
+
+        </v-navigation-drawer>
+        <v-layout column justify-start fill-height style="margin-left: 400px">
+            <v-card class="ma-4">
+              <v-card-text>
+                <b>Phylogenetic signal</b> is a measure of the nonindependence among species traits due to their phylogenetic relatedness (Revell et al. 2008).
+                <br></br>
+  	      In this app, you can use either Pagel's Lambda or Blomberg's K to measure phylogenetic signal in a given trait. If the trait you are interested in is discrete, you can also choose between the following models: Equal Rates (ER), Symmetrical (SYM), or All Rates Different (ARD).
+  	      <br></br>
+                1. Upload your table (.csv) and tree (Newick, .phy).
+                <br></br>
+                2. Select the desired column and a method for the model to use.
+                <br></br>
+                3. Click GO.
+  	      <br></br>
+  	      <br></br>
+  	      Source cited: Revell, L.J., L.J. Harmon, & D.C. Collar. (2008) Phylogenetic Signal, Evolutionary Process, and Rate. <i>Systematic Biology</i>, 57(4): 591-601.
+            </v-card-text>
+            </v-card>
+            <v-card v-if="table.length > 0" class="mb-4 ml-4 mr-4">
+              <v-card-text>{{ tableFileName }}</v-card-text>
+              <json-data-table :data="table" />
+            </v-card>
+          <div v-if="running" xs12 class="text-xs-center mb-4 ml-4 mr-4">
+            Running (Job Status {{ job.status }}) ...
+          </div>
+
+  	  <v-card v-if="this.selectedModel === 'Lambda' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>Log-Likelihood (Lambda fixed at 0):</b>
+  		<br></br>
+  		{{ this.result[0]["Log-Likelihood (Lambda fixed at 0)"] }}
+  		<br></br>
+  		Here, lambda is fixed at 0 (meaning every species is statistically independent of every other species). This number represents the log-likelihood of lambda being 0.
+  	    </v-card-text>
+  	  </v-card>
+  	  <v-card v-if="this.selectedModel === 'Lambda' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>Log-Likelihood (Lambda Estimated):</b>
+  		<br></br>
+  		{{ this.result[0]["Log-Likelihood (Lambda estimated)"] }}
+  		<br></br>
+  		This result is similar to the one above, except that lambda is estimated and not fixed at 0.
+  	    </v-card-text>
+  	  </v-card>
+  	  <v-card v-if="this.selectedModel === 'Lambda' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>Chi-Squared Test Statistic:</b>
+  		<br></br>
+  		{{ this.result[0]["Chi-Squared Test Statistic"] }}
+  		<br></br>
+  		This result is the test statistic obtained when a chi-square test is performed to compare the provided data to the expected chi-square distribution.
+  	    </v-card-text>
+  	  </v-card>
+  	  <v-card v-if="this.selectedModel === 'Lambda' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>Chi-Square P Value:</b>
+  		<br></br>
+  		{{ this.result[0]["Chi-Squared P Value"] }}
+  		<br></br>
+  		This is the p value obtained from the chi-square test described above.
+  	    </v-card-text>
+  	  </v-card>
+  	  <v-card v-if="this.selectedModel === 'Lambda' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>AICc Score (Lambda fixed at 0):</b>
+  		<br></br>
+  		{{ this.result[0]["AICc Score (Lambda fixed at 0)"] }}
+  		<br></br>
+  		This AICc (AIC with a correction for small sample sizes) score is computed with lambda fixed at 0.
+  	    </v-card-text>
+  	  </v-card>
+  	  <v-card v-if="this.selectedModel === 'Lambda' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>AICc Score (Lambda Estimated):</b>
+  		<br></br>
+  		{{ this.result[0]["AICc Score (Lambda Estimated)"] }}
+  		<br></br>
+  		This AICc score is similar to the one above, except lambda is estimated.
+  	    </v-card-text>
+  	  </v-card>
+  	  <v-card v-if="this.selectedModel === 'Lambda' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>Lambda Value:</b>
+  		<br></br>
+  		{{ this.result[0]["Lambda Value"] }}
+  		<br></br>
+  		This is the lambda value used for  model fitting.
+  	    </v-card-text>
+  	  </v-card>
+
+  	  <v-card v-if="this.selectedModel === 'K' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>Blomberg's K Value:</b>
+  		<br></br>
+  		{{ this.result[0]["K"] }}
+  		<br></br>
+  		K is a descriptive statistic that gauges the amount of phylogenetic signal.
+  	    </v-card-text>
+  	  </v-card>
+  	  <v-card v-if="this.selectedModel === 'K' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>Mean observed variance of PICs:</b>
+  		<br></br>
+  		{{ this.result[0]["vObs"] }}
+  		<br></br>
+  		This is the observed variance of phylogenetically independent contrasts (PICs).
+  	    </v-card-text>
+  	  </v-card>
+  	  <v-card v-if="this.selectedModel === 'K' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>Mean random variance of PICs:</b>
+  		<br></br>
+  		{{ this.result[0]["vRnd"] }}
+  		<br></br>
+  		This is the random variance of PICs obtained through the use of tip shuffling randomization.
+  	    </v-card-text>
+  	  </v-card>
+  	  <v-card v-if="this.selectedModel === 'K' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>P value:</b>
+  		<br></br>
+  		{{ this.result[0]["pVal"] }}
+  		<br></br>
+  		This is the p value that results from testing the difference between the observed vs random variance of PICs.
+  	    </v-card-text>
+  	  </v-card>
+  	  <v-card v-if="this.selectedModel === 'K' && result.length > 0" class="mb-4 ml-4 mr-4">
+  	    <v-card-text>
+  		<b>Z-score:</b>
+  		<br></br>
+  		{{ this.result[0]["zScore"] }}
+  		<br></br>
+  		This is the z-score that results from testing the difference between the observed vs random variance of PICs.
+  	    </v-card-text>
+  	  </v-card>
+
+  	  <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
+              <v-card-text>Result summary</v-card-text>
+              <json-data-table :data="result" hide-actions/>
+            </v-card>
+        </v-layout>
+      </v-layout>
+    </v-app>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.21.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-dsv@3"></script>
+
+<script>
+
+new Vue({
+  el: '#app',
+  vuetify: new Vuetify(),
+
+  data: () => ({
+    tableFile: {},
+    table: [],
+    treeFile: {},
+    tableFileName: '',
+    treeFileName: '',
+    job: { status: 0 },
+    running: false,
+    columns: [],
+    selectedColumn: null,
+    models: ['Lambda','K'],
+    selectedModel: '',
+    discreteModels: ['ER','SYM','ARD'],
+    selectedDiscrete: 'ER',
+    result: [],
+    resultColumns: [],
+    plotUrl: '',
+  }),
+  asyncComputed: {
+    scratchFolder() {
+      return scratchFolder(this.girderRest);
+    },
+  },
+  computed: {
+    readyToRun() {
+      return !!this.treeFileName &&
+        !!this.tableFileName &&
+        !!this.selectedModel &&
+        !!this.selectedColumn;
+    },
+
+    readyToDownload() {
+      return (this.result && !this.running && this.runCompleted)
+    },
+
+  },
+
+  methods: {
+
+   // thanks to: https://thegermancoder.com/2018/11/29/how-to-parse-csv-with-javascript/
+    CSVToArray(strData) {
+      let lines = strData.split(/(?:\r\n|\n)+/).filter(function(el) {return el.length != 0});
+      let headers = lines.splice(0, 1)[0].split(",");
+      let valuesRegExp = /(?:\"([^\"]*(?:\"\"[^\"]*)*)\")|([^\",]+)/g;
+      let elements = [];
+      for (let i = 0; i < lines.length; i++) {
+          let element = {};
+          let j = 0;
+          while (matches = valuesRegExp.exec(lines[i])) {
+              var value = matches[1] || matches[2];
+              value = value.replace(/\"\"/g, "\"");
+              element[headers[j]] = value;
+              j++;
+          }
+          elements.push(element);
+      }
+      return elements
+    },
+
+    async run() {
+      this.running = true;
+      this.errorLog = null;
+      var that = this
+
+      jQuery.ajax({
+        url: '/phylosignal/run',
+        type: "POST",
+        contentType: 'application/json',
+        data: JSON.stringify({
+          column: this.selectedColumn,
+          selModel: this.selectedModel,
+          disModel: this.selectedDiscrete
+        }),
+        success: function(returnedData) {
+          console.log('Returned data:', returnedData)
+          var dataAsJSON = JSON.parse(returnedData)
+          console.log('content returned:',dataAsJSON)
+          // use the temporay that we initialized above
+          that.result = dataAsJSON
+          that.runCompleted = true
+          // Kristen: other variables here
+          that.running = false
+        },
+        error: function(data){
+          alert( 'Sorry.' );
+          this.runCompleted = true
+          this.running = false
+
+        }
+    });
+  },
+
+  async uploadTable(file) {
+      console.log('uploadTable in PhyloSignal was called')
+
+      if (file) {
+        this.tableFileName = file.name;
+        const reader = new FileReader();
+        reader.addEventListener('loadend', e => {
+          const text = e.srcElement.result;
+          //this.table = this.CSVToArray(text);
+          this.table = d3.csvParse(text)
+          this.columns = this.table.columns
+
+          // pass the table data to the server backend
+          jQuery.ajax({
+              url: '/pic/table_upload',
+              type: "POST",
+              contentType: 'application/json',
+              data: JSON.stringify({
+                table: this.table
+              }),
+              success: function(data){
+                console.log(data)
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+              }
+          });
+        });
+        reader.readAsText(file);
+      }
+    },
+
+    async uploadTree(file) {
+      console.log('uploadTree in PhyloSignal')
+
+      if (file) {
+        this.treeFileName = file.name;
+        const reader = new FileReader();
+        reader.addEventListener('loadend', e => {
+          const text = e.srcElement.result;
+          this.tree = text;
+          console.log('Read tree file content!!');
+
+          // pass the tree file as a string to the server
+          jQuery.ajax({
+              url: '/pic/tree_upload',
+              type: "POST",
+              //processData: false,
+              contentType: 'application/json',
+              data: JSON.stringify({
+                tree: this.tree
+              }),
+              success: function(data){
+                console.log('success!!')
+              },
+              error: function(data){
+                alert( 'Sorry.' );
+              }
+          });
+        });
+        reader.readAsText(file);
+      };
+    },
+
+    downloadResults() {
+      console.log('trying to buld csv and download')
+      
+      // this.result is an array. be sure to pick off the first element
+      // e.g. this.result[0] 
+      
+      // iterate through the first row to find the column names
+      var csvOutput = ''
+      // print the title line
+      for (const key in this.result[0]) {
+        if ((key != 'points') && (key != 'connections')) {
+        csvOutput += key+','
+        }
+      }
+      // ToDo: would be best to strip off the last comma here
+      csvOutput += '\n'
+
+      // print out the values
+      for (const key in this.result[0]) {
+        if ((key != 'points') && (key != 'connections')) {
+        csvOutput += this.result[0][key]+','
+        }
+      }
+      // ToDo: would be best to strip off the last comma here
+      csvOutput += '\n'
+
+      // the csvOutput has been created as a string, now attach it to an
+      // HTML element in the window and click "download" on that element
+      // the local filename will be called whatever we use in the setAttribute
+      // call, currently it is "model_results.csv"
+      console.log(csvOutput)
+      const url = window.URL.createObjectURL(new Blob([csvOutput]));
+      console.log("url:",url)
+      // this is an old but still normal way to download a file, attach it to an
+      // <a> tag and click the link. We then remove the tag after downloaing.
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'model_results.csv') //or any other extension;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+
+  }
+})
+</script>
+</body>
+</html>

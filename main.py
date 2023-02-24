@@ -3,13 +3,22 @@ from fastapi.staticfiles import StaticFiles
 
 # import your apps
 import fit_continuous
-import trait_explorer
+import pic
+import phylosignal
+import asr
+import fit_discrete
+import parsimony_tree
 
 app = FastAPI()
 
 # initialize your apps
 #trait_explorer.init(app)
 fit_continuous.init(app)
+pic.init(app)
+phylosignal.init(app)
+asr.init(app)
+fit_discrete.init(app)
+parsimony_tree.init(app)
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
 
@@ -17,7 +26,5 @@ app.mount('/static', StaticFiles(directory='static'), name='static')
 def index():
     with open('index.html') as indexFile:
         indexContent = indexFile.read()
-    
+
     return Response(content=indexContent, media_type='text/html')
-
-

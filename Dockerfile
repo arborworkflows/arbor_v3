@@ -1,18 +1,36 @@
+
+
 #FROM r-base
 FROM ubuntu:20.04
 
-RUN apt-get update && apt-get install -qy \
-	apt-utils \
-    gcc \
-    libpython3-dev \
-    git 
-
-#RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update
 
 # set time zone for mongodb
 RUN echo 'building Arbor v3'
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y install tzdata
+#RUN dpkg-reconfigure --frontend noninteractive tzdata
+
+RUN apt-get update && apt-get install -qy \
+	apt-utils \
+    gcc \
+    libpython3-dev \
+    libxml2-dev \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    libfontconfig1-dev \
+    libfribidi-dev \
+    libharfbuzz-dev \
+    libfreetype6-dev \
+    libpng-dev \
+    libtiff5-dev \
+    libjpeg-dev \
+    libgsl-dev \
+    git 
+
+#RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+
 
 RUN apt install gnupg2 -qy
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
@@ -23,7 +41,12 @@ RUN apt-get install -qy r-base
 RUN apt-get install -qy r-base-core
 RUN apt-get install -qy r-recommended
 
-
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("ape")'
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("phytools")'
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("geiger")'
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("diversitree")'
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("devtools")'
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'devtools::install_github("arborworkflows/aRbor")'
 #RUN apt install software-properties-common
 
 #RUN apt add-apt-repository ppa:c2d4u.team/c2d4u4.0+
