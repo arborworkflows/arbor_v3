@@ -335,8 +335,12 @@
             }],
             mark: {type:"point", fill: "#4C78A8"},
             encoding: {
-              x: {field: "x", type: "quantitative", axis: {grid: false}},
-              y: {field: "y", type: "quantitative", axis: {grid: false}},
+              x: {field: "x", type: "quantitative",
+              axis: {labelFontSize:0, domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
+              y: {field: "y", type: "quantitative",
+              axis: {labelFontSize:0, domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
               }
             },
             {data: {values: that.result.points, format:{type: "json"}},
@@ -360,7 +364,7 @@
               y: {field: "y1", type: "quantitative"},
               y2: {field: "y2", type: "quantitative"},
               },
-           
+
             },
             {data: {values: that.result.graph, format:{type: "json"}},
             mark: {type:"text", color:"blue", "dy": {"expr": 10}},
@@ -369,7 +373,7 @@
               y: {field: "midpoint_y", type: "quantitative"},
               text: {field: "transrate", type: "quantitative"},
               },
-           
+
             }
           ]
           };
@@ -388,7 +392,7 @@
           }
           var csvOutput = ''
           // print the title line
-          // exclude the graph objects 
+          // exclude the graph objects
           for (const key in this.result) {
             if ((key != 'points') && (key != 'connections') && (key != 'graph')) {
             csvOutput += key+','

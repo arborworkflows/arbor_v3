@@ -152,7 +152,7 @@
       },
 
       readyToDownload() {
-        return (this.result.length>0 && !this.running && this.job.status===3)
+        return (this.result && !this.running && this.runCompleted)
       },
 
     },
@@ -295,8 +295,12 @@
             }],
             mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
             encoding: {
-              x: {field: "Node_x_coord", type: "quantitative"},
-              y: {field: "Node_y_coord", type: "quantitative"},
+              x: {field: "Node_x_coord", type: "quantitative",
+              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
+              y: {field: "Node_y_coord", type: "quantitative",
+              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
               }
             },
             {data: {values: that.result.points, format:{type: "json"}},
@@ -307,18 +311,30 @@
             }],
             mark: {type:"text", fill: "#000000", align: {expr:"datum.Node_x_coord"}, dx: {expr:10}},
             encoding: {
-              x: {field: "Node_x_coord", type: "quantitative"},
-              y: {field: "Node_y_coord", type: "quantitative"},
+              x: {field: "Node_x_coord", type: "quantitative",
+              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
+              y: {field: "Node_y_coord", type: "quantitative",
+              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
               text: {field: "Species", type: "ordinal"},
               }
             },
             {data: {values: that.result.connections, format:{type: "json"}},
             mark: {type:"rule", color:"darkgreen", strokeWidth:0.4, tooltip: {content: "data"}},
             encoding: {
-              x: {field: "V1_x", type: "quantitative"},
-              x2: {field: "V2_x", type: "quantitative"},
-              y: {field: "V1_y", type: "quantitative"},
-              y2: {field: "V2_y", type: "quantitative"},
+              x: {field: "V1_x", type: "quantitative",
+              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
+              x2: {field: "V2_x", type: "quantitative",
+              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
+              y: {field: "V1_y", type: "quantitative",
+              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
+              y2: {field: "V2_y", type: "quantitative",
+              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+              title: null},
               }
             }
           ]
@@ -345,8 +361,12 @@
           }],
           mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
           encoding: {
-            x: {field: "Node_x_coord", type: "quantitative", axis: {grid: false},},
-            y: {field: "Node_y_coord", type: "quantitative", axis: {grid: false},},
+            x: {field: "Node_x_coord", type: "quantitative",
+            axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+            title: null},
+            y: {field: "Node_y_coord", type: "quantitative",
+            axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
+            title: null},
             }
           },
           {data: {values: that.result.points, format:{type: "json"}},
