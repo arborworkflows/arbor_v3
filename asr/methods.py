@@ -129,7 +129,7 @@ write.csv(edge_df, connect_file, row.names = FALSE)
     # Rename the first column (since R doesn't give it a name)
     result_df.rename(columns = {'Unnamed: 0':'Name'}, inplace = True)
     print(result_df)
-
+   
     result_as_dict_list = result_df.to_dict('records')
     #print('result as dict_list:',result_as_dict_list)
 
@@ -140,6 +140,17 @@ write.csv(edge_df, connect_file, row.names = FALSE)
     points_json = points_df.to_dict('records')
     #print(points_json)
 
+    #build a dataset for the charts on the internal nodes
+    charts = []
+    for count,rec in enumerate(result_as_dict_list):
+        chart_rec = {}
+        for attrib in rec:
+            if attrib not in ["node_labels","Name"]:
+                chart_rec[attrib] = rec[attrib]
+                chart_rec['x'] = points_json[100+count]['Node_x_coord']
+                chart_rec['y'] = points_json[100+count]['Node_y_coord']   
+        charts.append(chart_rec)         
+
     # repack from pandas dataframe into a dictionary.
 
     result = {}
@@ -147,6 +158,7 @@ write.csv(edge_df, connect_file, row.names = FALSE)
     result['connections'] = connections_json
     # values are returned as a list of dictionaries
     result['traits'] = result_as_dict_list
+    result['charts'] = charts
     
     # return the data arrays here as a JSON blob to javascript
     # for javascript to render in vegalite

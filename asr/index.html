@@ -380,6 +380,20 @@
             y2: {field: "V2_y", type: "quantitative"}
             }
           },
+          {data: {values: that.result.charts, format:{type: "json"}},
+          transform: [{fold: ["CG", "GB","T","TC","TG","TW","U"]}],
+          mark: {type:"arc", strokeWidth:1.0, tooltip: {content: "data"}},
+          encoding: {
+            x: {field: "x", type: "quantitative"},
+            xOffset: {value: -20},
+            y: {field: "y", type: "quantitative"},
+            yOffset: {value: -5},
+            color: {field: "key",type:"nominal"},
+            theta: {field: "value", type:"quantitative"},
+            radius: {value: 20},
+            }
+          },
+         
         ]
         };
 
