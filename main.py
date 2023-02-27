@@ -8,6 +8,7 @@ import phylosignal
 import asr
 import fit_discrete
 import parsimony_tree
+import table_lineup
 
 app = FastAPI()
 
@@ -19,6 +20,7 @@ phylosignal.init(app)
 asr.init(app)
 fit_discrete.init(app)
 parsimony_tree.init(app)
+table_lineup.init(app)
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
 
