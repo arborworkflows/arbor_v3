@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -qy \
     libtiff5-dev \
     libjpeg-dev \
     libgsl-dev \
-    git 
+    git
 
 #RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -qy \
 
 RUN apt install gnupg2 -qy
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
-RUN apt-get -qy install software-properties-common 
+RUN apt-get -qy install software-properties-common
 RUN add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'
 RUN apt update -qy
 RUN apt-get install -qy r-base
@@ -45,6 +45,7 @@ RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("phytools")'
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("geiger")'
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("diversitree")'
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("dplyr")'
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("devtools")'
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'devtools::install_github("arborworkflows/aRbor")'
 #RUN apt install software-properties-common
@@ -56,9 +57,9 @@ RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'devtools::instal
 WORKDIR /usr/src/app
 
 # get pip3 for installations
-RUN apt-get install -qy wget 
+RUN apt-get install -qy wget
 RUN wget https://bootstrap.pypa.io/get-pip.py
-RUN apt-get install -qy python3 
+RUN apt-get install -qy python3
 RUN apt-get install -qy python3-distutils
 RUN python3 get-pip.py
 
