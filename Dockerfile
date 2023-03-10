@@ -44,9 +44,11 @@ RUN apt-get install -qy r-recommended
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("ape")'
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("phytools")'
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("geiger")'
-RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("diversitree")'
+#RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("diversitree")'
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("dplyr")'
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'install.packages("devtools")'
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'devtools::install_github("richfitz/diversitree")'
+RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'devtools::install_github("uyedaj/treeplyr")'
 RUN /usr/bin/Rscript --slave --no-save --no-restore-history -e 'devtools::install_github("arborworkflows/aRbor")'
 #RUN apt install software-properties-common
 
