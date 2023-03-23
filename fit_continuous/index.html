@@ -267,7 +267,7 @@
                 that.running = false
                 that.renderTheSpec(that)
                 that.renderPrettyJsonTree(that)
-                that.renderSquareTree(that)
+                that.squareTreeRender(that)
               },
               error: function(data){
                 alert( 'Sorry.' );
@@ -583,7 +583,7 @@
 
 
 
-        downloadResults() {
+        async downloadResults() {
           console.log('trying to buld csv and download')
           // iterate through the first row to find the column names
           var csvOutput = ''

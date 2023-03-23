@@ -134,6 +134,7 @@ write.csv(edge_df, connect_file, row.names = FALSE)
 
     result_as_dict = result_df.to_dict('records')
     print('result as dict:',result_as_dict)
+    print('length: ', len(result_as_dict))
 
     # retreive the tree information from the R result
     connections_df = pd.read_csv('/tmp/connect_file.csv')
@@ -149,6 +150,9 @@ write.csv(edge_df, connect_file, row.names = FALSE)
     result['connections'] = connections_json
     # values are returned as a list of dictionaries
     result['traits'] = result_as_dict
+    #for i in result_as_dict:
+    #    for key in i.keys():
+    #        result[key] = i[key]
 
     # return the data arrays here as a JSON blob to javascript
     # for javascript to render in vegalite
