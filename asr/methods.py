@@ -132,6 +132,9 @@ write.csv(edge_df, connect_file, row.names = FALSE)
     result_df.rename(columns = {'Unnamed: 0':'Name'}, inplace = True)
     print(result_df)
 
+    result_as_csv = result_df.to_csv(sep = ",")
+    print(result_as_csv)
+
     result_as_dict = result_df.to_dict('records')
     print('result as dict:',result_as_dict)
     print('length: ', len(result_as_dict))
@@ -150,6 +153,8 @@ write.csv(edge_df, connect_file, row.names = FALSE)
     result['connections'] = connections_json
     # values are returned as a list of dictionaries
     result['traits'] = result_as_dict
+    result['traits_csv'] = result_as_csv 
+
     #for i in result_as_dict:
     #    for key in i.keys():
     #        result[key] = i[key]

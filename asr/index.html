@@ -414,15 +414,15 @@
   	    // iterate through the first row to find the column names
         var csvOutput = ''
 
-        for (const key in this.result) {
-            if ((key != 'points') && (key != 'connections')) {
-            csvOutput += key+','
-            }
-        }
-        csvOutput += "\n";
+        //for (const key in this.result) {
+        //    if ((key != 'points') && (key != 'connections') && (key != 'traits')) {
+        //    csvOutput += key+','
+        //    }
+        //}
+        //csvOutput += "\n";
 
         for (const key in this.result) {
-          if ((key != 'points') && (key != 'connections')) {
+          if ((key != 'points') && (key != 'connections') && (key != 'traits')) {
             csvOutput += this.result[key]+','
           }
         }
