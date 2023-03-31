@@ -36,10 +36,13 @@ def run_method(params):
     env['plot_file'] = '/tmp/plotfile.png'
     env['graph_file'] = '/tmp/graphfile.csv'
     env['point_file'] = '/tmp/graphpoints.csv'
+    env['forward_file'] = '/tmp/forwardpoints.csv'
+    env['backward_file'] = '/tmp/backwardpoints.csv'
     r('''
 require(ape)
 require(geiger)
 require(phytools)
+require(dplyr)
 
 tree <- read.tree(tree_file)
 table <- read.csv(table_file, row.names = 1, check.names = FALSE)
@@ -138,6 +141,43 @@ for(i in 1:tot) {
 combo_df <- cbind(x1,y1,name1,x2,y2,name2,transrate,midpoint_x,midpoint_y)
 write.csv(combo_df, graph_file, row.names = FALSE)
 
+# Separate combo_df into two different ones - forward and backward
+rows_backward <- rep(NA, (tot/2)) # Create empty vector to hold backward rows
+
+for(i in 1:tot) {
+  # Grab name1 and name2
+  name1_for <- combo_df[i,3]
+  name2_for <- combo_df[i,6]
+  for(j in ((i+1):tot)){
+    # Start the range at i+1 because we don't want to match the current forward
+    # For the end case:
+    if(j == 13) {
+        break
+    }
+    compare <- combo_df[j,3] # Grab the name1 column
+
+    # If the current name1 == the original name2
+    if(compare == name2_for){
+      compare2 <- combo_df[j,6] # Grab the next new name2 column
+
+      # If the new name2 column == the original name1, then that's the backward row
+      if(compare2 == name1_for){
+        rows_backward[i] <- j
+      }
+    }
+  }
+}
+
+# Grab all backward rows from combo_df
+rows_backward <- rows_backward[!(is.na(rows_backward))]
+combo_df_back <- combo_df[rows_backward,]
+write.csv(combo_df_back, backward_file, row.names = FALSE)
+
+# Grab all forward rows from combo_df
+combo_df_for <- as.data.frame(combo_df) %>%  filter(!row_number() %in% rows_backward)
+write.csv(combo_df_for, forward_file, row.names=FALSE)
+
+
     ''')
     print('** need to collect result from R here')
     #print(env['result'])
@@ -161,6 +201,14 @@ write.csv(combo_df, graph_file, row.names = FALSE)
     key_json = key_df.to_dict('records')
     print(key_json)
 
+    forward_df = pd.read_csv('/tmp/forwardpoints.csv')
+    forward_json = forward_df.to_dict('records')
+    print(forward_json)
+
+    backward_df = pd.read_csv('/tmp/backwardpoints.csv')
+    backward_json = backward_df.to_dict('records')
+    print(backward_json)
+
     # [{},{}]
     # json:  {'data': []}
 
@@ -169,6 +217,9 @@ write.csv(combo_df, graph_file, row.names = FALSE)
     result = {}
     result['graph'] = graph_json
     result['points'] = key_json
+    result['forward'] = forward_json
+    result['backward'] = backward_json
+
     for key in result_as_dict[0].keys():
         result[key] = result_as_dict[0][key]
 

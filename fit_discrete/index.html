@@ -356,8 +356,18 @@
               text: {field: "alpha_names", type: "ordinal"},
               }
             },
-            {data: {values: that.result.graph, format:{type: "json"}},
-            mark: {type:"rule", color:"darkgreen", strokeWidth:1},
+            {data: {values: that.result.forward, format:{type: "json"}},
+            mark: {type:"rule", color:"darkgreen", size:{field: "transrate", type: "quantitative"}},
+            encoding: {
+              x: {field: "x1", type: "quantitative"},
+              x2: {field: "x2", type: "quantitative"},
+              y: {field: "y1", type: "quantitative"},
+              y2: {field: "y2", type: "quantitative"},
+              },
+
+            },
+            {data: {values: that.result.backward, format:{type: "json"}},
+            mark: {type:"rule", color:"purple", size:{field: "transrate", type: "quantitative"}},
             encoding: {
               x: {field: "x1", type: "quantitative"},
               x2: {field: "x2", type: "quantitative"},
@@ -394,7 +404,7 @@
           // print the title line
           // exclude the graph objects
           for (const key in this.result) {
-            if ((key != 'points') && (key != 'connections') && (key != 'graph')) {
+            if ((key != 'points') && (key != 'connections') && (key != 'graph') && (key != 'forward') && (key != 'backward')) {
             csvOutput += key+','
             }
           }
@@ -404,7 +414,7 @@
           // print out the values
           // exclude the graph objects
           for (const key in this.result) {
-            if ((key != 'points') && (key != 'connections') && (key != 'graph')) {
+            if ((key != 'points') && (key != 'connections') && (key != 'graph') && (key != 'forward') && (key != 'backward')) {
             csvOutput += this.result[key]+','
             }
           }
