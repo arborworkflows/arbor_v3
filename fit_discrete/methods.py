@@ -151,7 +151,7 @@ for(i in 1:tot) {
   for(j in ((i+1):tot)){
     # Start the range at i+1 because we don't want to match the current forward
     # For the end case:
-    if(j == 13) {
+    if(j == (tot+1)) {
         break
     }
     compare <- combo_df[j,3] # Grab the name1 column

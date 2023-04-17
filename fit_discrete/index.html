@@ -357,7 +357,13 @@
               }
             },
             {data: {values: that.result.forward, format:{type: "json"}},
-            mark: {type:"rule", color:"darkgreen", size:{field: "transrate", type: "quantitative"}},
+            transform: [
+              {calculate: ".02+datum.x1", as: "x1"},
+              {calculate: ".03+datum.y1", as: "y1"},
+              {calculate: ".02+datum.x2", as: "x2"},
+              {calculate: ".03+datum.y2", as: "y2"}
+            ],
+            mark: {type:"rule", color:"darkgreen", size: 5},
             encoding: {
               x: {field: "x1", type: "quantitative"},
               x2: {field: "x2", type: "quantitative"},
@@ -367,7 +373,7 @@
 
             },
             {data: {values: that.result.backward, format:{type: "json"}},
-            mark: {type:"rule", color:"purple", size:{field: "transrate", type: "quantitative"}},
+            mark: {type:"rule", color:"purple", size: 5},
             encoding: {
               x: {field: "x1", type: "quantitative"},
               x2: {field: "x2", type: "quantitative"},
