@@ -168,15 +168,82 @@ for(i in 1:tot) {
   }
 }
 
+### BACKWARD ###
 # Grab all backward rows from combo_df
 rows_backward <- rows_backward[!(is.na(rows_backward))]
 combo_df_back <- combo_df[rows_backward,]
+
+# Add arrow coordinates
+back_size <- nrow(combo_df_back)
+# Create empty vectors to fill in loop
+x3 <- rep(NA, back_size)
+y3 <- rep(NA, back_size)
+x4 <- rep(NA, back_size)
+y4 <- rep(NA, back_size)
+# Hard code theta for now?
+theta <- 40
+
+# Loop to calculate x3, y3, x4, and y4
+for(i in c(1:back_size)){
+  # Grab coordinates
+  x2 <- as.numeric(combo_df_back[i,4])
+  x1 <- as.numeric(combo_df_back[i,1])
+  y2 <- as.numeric(combo_df_back[i,5])
+  y1 <- as.numeric(combo_df_back[i,2])
+
+  # Line length
+  d <- sqrt((x2-x1)^2 + (y2-y1)^2)
+  # Arrow line length
+  arr_d <- d/5
+
+  # Calculate arrow points
+  x3[i] <- x2 + (arr_d/d)*((x1-x2)*cos(theta) + (y1-y2)*sin(theta))
+  y3[i] <- y2 + (arr_d/d)*((y1-y2)*cos(theta) - (x1-x2)*sin(theta))
+  x4[i] <- x2 + (arr_d/d)*((x1-x2)*cos(theta) - (y1-y2)*sin(theta))
+  y4[i] <- y2 + (arr_d/d)*((y1-y2)*cos(theta) + (x1-x2)*sin(theta))
+}
+
+# Add arrow coordinates to combo_df_back
+combo_df_back <- cbind(combo_df_back, x3, y3, x4, y4)
 write.csv(combo_df_back, backward_file, row.names = FALSE)
 
+### FORWARD ###
 # Grab all forward rows from combo_df
 combo_df_for <- as.data.frame(combo_df) %>%  filter(!row_number() %in% rows_backward)
-write.csv(combo_df_for, forward_file, row.names=FALSE)
 
+# Add arrow coordinates
+for_size <- nrow(combo_df_for)
+# Create empty vectors to fill in loop
+x3 <- rep(NA, for_size)
+y3 <- rep(NA, for_size)
+x4 <- rep(NA, for_size)
+y4 <- rep(NA, for_size)
+# Hard code theta for now?
+theta <- 40
+
+# Loop to calculate x3, y3, x4, and y4
+for(i in c(1:for_size)){
+  # Grab coordinates
+  x2 <- as.numeric(combo_df_for[i,4])
+  x1 <- as.numeric(combo_df_for[i,1])
+  y2 <- as.numeric(combo_df_for[i,5])
+  y1 <- as.numeric(combo_df_for[i,2])
+
+  # Line length
+  d <- sqrt((x2-x1)^2 + (y2-y1)^2)
+  # Arrow line length
+  arr_d <- d/5
+
+  # Calculate arrow points
+  x3[i] <- x2 + (arr_d/d)*((x1-x2)*cos(theta) + (y1-y2)*sin(theta))
+  y3[i] <- y2 + (arr_d/d)*((y1-y2)*cos(theta) - (x1-x2)*sin(theta))
+  x4[i] <- x2 + (arr_d/d)*((x1-x2)*cos(theta) - (y1-y2)*sin(theta))
+  y4[i] <- y2 + (arr_d/d)*((y1-y2)*cos(theta) + (x1-x2)*sin(theta))
+}
+
+# Add arrow coordinates to combo_df_for
+combo_df_for <- cbind(combo_df_for, x3,y3,x4,y4)
+write.csv(combo_df_for, forward_file, row.names=FALSE)
 
     ''')
     print('** need to collect result from R here')
