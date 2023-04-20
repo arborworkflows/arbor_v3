@@ -181,7 +181,7 @@ y3 <- rep(NA, back_size)
 x4 <- rep(NA, back_size)
 y4 <- rep(NA, back_size)
 # Hard code theta for now?
-theta <- 40
+theta <- 0.7
 
 # Loop to calculate x3, y3, x4, and y4
 for(i in c(1:back_size)){
@@ -194,7 +194,7 @@ for(i in c(1:back_size)){
   # Line length
   d <- sqrt((x2-x1)^2 + (y2-y1)^2)
   # Arrow line length
-  arr_d <- d/5
+  arr_d <- d/20
 
   # Calculate arrow points
   x3[i] <- x2 + (arr_d/d)*((x1-x2)*cos(theta) + (y1-y2)*sin(theta))
@@ -218,8 +218,6 @@ x3 <- rep(NA, for_size)
 y3 <- rep(NA, for_size)
 x4 <- rep(NA, for_size)
 y4 <- rep(NA, for_size)
-# Hard code theta for now?
-theta <- 40
 
 # Loop to calculate x3, y3, x4, and y4
 for(i in c(1:for_size)){
@@ -232,7 +230,7 @@ for(i in c(1:for_size)){
   # Line length
   d <- sqrt((x2-x1)^2 + (y2-y1)^2)
   # Arrow line length
-  arr_d <- d/5
+  arr_d <- d/20
 
   # Calculate arrow points
   x3[i] <- x2 + (arr_d/d)*((x1-x2)*cos(theta) + (y1-y2)*sin(theta))

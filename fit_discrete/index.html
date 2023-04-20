@@ -372,6 +372,16 @@
               },
 
             },
+            {data: {values: that.result.forward, format:{type: "json"}},
+            mark: {type:"rule", color:"darkgreen", size: 5},
+            encoding: {
+              x: {field: "x2", type: "quantitative"},
+              x2: {field: "x3", type: "quantitative"},
+              y: {field: "y2", type: "quantitative"},
+              y2: {field: "y3", type: "quantitative"},
+              },
+
+            },
             {data: {values: that.result.backward, format:{type: "json"}},
             mark: {type:"rule", color:"purple", size: 5},
             encoding: {
@@ -379,6 +389,26 @@
               x2: {field: "x2", type: "quantitative"},
               y: {field: "y1", type: "quantitative"},
               y2: {field: "y2", type: "quantitative"},
+              },
+
+            },
+            {data: {values: that.result.backward, format:{type: "json"}},
+            mark: {type:"rule", color:"purple", size: 5},
+            encoding: {
+              x: {field: "x2", type: "quantitative"},
+              x2: {field: "x3", type: "quantitative"},
+              y: {field: "y2", type: "quantitative"},
+              y2: {field: "y3", type: "quantitative"},
+              },
+
+            },
+            {data: {values: that.result.backward, format:{type: "json"}},
+            mark: {type:"rule", color:"purple", size: 5},
+            encoding: {
+              x: {field: "x2", type: "quantitative"},
+              x2: {field: "x4", type: "quantitative"},
+              y: {field: "y2", type: "quantitative"},
+              y2: {field: "y4", type: "quantitative"},
               },
 
             },
