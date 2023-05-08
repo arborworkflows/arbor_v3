@@ -120,6 +120,7 @@ name2 <- 1:tot
 transrate <- direction_df$TransRate
 midpoint_x <- 1:tot
 midpoint_y <- 1:tot
+slope_angle <- 1:tot
 
 for(i in 1:tot) {
   from <- direction_df[i,1] # ith row, 1st column
@@ -135,10 +136,14 @@ for(i in 1:tot) {
 
   midpoint_x[i] <- (x1[i] + x2[i])/2
   midpoint_y[i] <- (y1[i] + y2[i])/2
+
+  slope <- (y2[i]-y1[i])/(x2[i]-x1[i])
+  slope_a <- atan(slope)
+  slope_angle[i] <- ((slope_a*180)/(pi))*-1 #-1 for Vega use
 }
 
 # Create final combined dataframe
-combo_df <- cbind(x1,y1,name1,x2,y2,name2,transrate,midpoint_x,midpoint_y)
+combo_df <- cbind(x1,y1,name1,x2,y2,name2,transrate,midpoint_x,midpoint_y,slope_angle)
 write.csv(combo_df, graph_file, row.names = FALSE)
 
 # Separate combo_df into two different ones - forward and backward

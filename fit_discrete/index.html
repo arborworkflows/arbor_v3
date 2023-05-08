@@ -382,6 +382,30 @@
               },
 
             },
+            {data: {values: that.result.forward, format:{type: "json"}},
+            mark: {type:"rule", color:"darkgreen", size: 5},
+            encoding: {
+              x: {field: "x2", type: "quantitative"},
+              x2: {field: "x4", type: "quantitative"},
+              y: {field: "y2", type: "quantitative"},
+              y2: {field: "y4", type: "quantitative"},
+              },
+
+            },
+            {data: {values: that.result.forward, format:{type: "json"}},
+            transform: [
+              {calculate: ".02+datum.midpoint_x", as: "midpoint_x"},
+              {calculate: ".03+datum.midpoint_y", as: "midpoint_y"}
+            ],
+            mark: {type:"text", color:"darkgreen", "dy": {"expr": 10}},
+            encoding: {
+              x: {field: "midpoint_x", type: "quantitative"},
+              y: {field: "midpoint_y", type: "quantitative"},
+              text: {field: "transrate", type: "quantitative"},
+              angle: {field: "slope_angle"},
+              },
+
+            },
             {data: {values: that.result.backward, format:{type: "json"}},
             mark: {type:"rule", color:"purple", size: 5},
             encoding: {
@@ -412,12 +436,13 @@
               },
 
             },
-            {data: {values: that.result.graph, format:{type: "json"}},
-            mark: {type:"text", color:"blue", "dy": {"expr": 10}},
+            {data: {values: that.result.backward, format:{type: "json"}},
+            mark: {type:"text", color:"purple", "dy": {"expr": 10}},
             encoding: {
               x: {field: "midpoint_x", type: "quantitative"},
               y: {field: "midpoint_y", type: "quantitative"},
               text: {field: "transrate", type: "quantitative"},
+              angle: {field: "slope_angle"},
               },
 
             }
