@@ -29,19 +29,6 @@
             >
           </v-flex>
 
-          <v-flex xs12>
-            <v-radio-group v-model ="mult_op">
-              <v-radio
-                 label = "Create a tree using all characters"
-                 value = "Yes">
-              </v-radio>
-              <v-radio
-                 label = "Create a tree using ONE character (select in drop-down below)"
-                 value = "No">
-              </v-radio>
-             </v-radio-group>
-           </v-flex>
-
            <v-flex xs12>
              <v-select label="Column" v-model="selectedColumn" :items="columns" />
            </v-flex>
@@ -81,15 +68,13 @@
       <v-layout column justify-start fill-height style="margin-left: 400px">
           <v-card class="ma-4">
             <v-card-text>
-            <b>Parsimony Tree</b> is an app that takes a character matrix as input and uses it to create a maximum parsimony tree using the <i>phangorn</i> package in R (Schliep 2011). It returns a VEGA visualization of the maximum parsimony tree.
+            <b>Parsimony Tree</b> is an app that takes a character matrix as input and uses it to create a maximum parsimony tree using the <i>phangorn</i> package in R (Schliep 2011). It returns a VEGA visualization of the maximum parsimony tree and an image of the most parsimonious reconstruction for a character of interest.
             <br><br>
             1. Upload your character matrix (.csv). This application assumes that the first column contains the tip labels, and the first row is the outgroup.
             <br><br>
-            2. Choose whether you would like to create your maximum parsimony tree using the whole character matrix (all characters), or just one column of the character matrix (one character).
+            2. Choose a character (column of the matrix) to use for the most parsimonious reconstruction output.
             <br><br>
-            3. If you would like to use just one character, use the dropdown to pick your character of interest. If you would like to use all characters, the dropdown will be ignored. IMPORTANT: if you do not choose a character when you've chosen to create a tree with one character, the application will not work and will display a pop-up that says "Sorry".
-            <br><br>
-            4. Click GO.
+            3. Click GO.
             <br><br>
             <br><br>
             Source cited: Schliep K.P. 2011. phangorn: phylogenetic analysis in R. Bioinformatics, 27(4) 592-593
@@ -104,6 +89,10 @@
           <v-card class ="mb-4 ml-4 mr-4">
             <v-card-text>Tree</v-card-text>
             <div ref="mp_plot"></div>
+          </v-card>
+          <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
+            <v-card-text>Most Parsimonious Reconstruction</v-card-text>
+            <img src="/tmp/plotfile.png">
           </v-card>
         </div>
       </v-layout>
@@ -141,7 +130,6 @@
     tableFileName: '',
     job: { status: 0 },
     running: false,
-    mult_op: null,
     columns: [],
     selectedColumn: null,
     runCompleted: false,
@@ -159,7 +147,7 @@
   computed: {
     readyToRun() {
       return !!this.tableFileName &&
-      !!this.mult_op;
+      !!this.selectedColumn;
     },
 
     readyToDownload() {
@@ -202,7 +190,6 @@
               type: "POST",
               contentType: 'application/json',
               data: JSON.stringify({
-                mult_op: this.mult_op,
                 column: this.selectedColumn
               }),
               success: function(returnedData) {

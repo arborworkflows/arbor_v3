@@ -397,7 +397,7 @@
               {calculate: ".02+datum.midpoint_x", as: "midpoint_x"},
               {calculate: ".03+datum.midpoint_y", as: "midpoint_y"}
             ],
-            mark: {type:"text", color:"darkgreen", "dy": {"expr": 10}},
+            mark: {type:"text", color:"darkgreen", dy: {expr: 10}},
             encoding: {
               x: {field: "midpoint_x", type: "quantitative"},
               y: {field: "midpoint_y", type: "quantitative"},
@@ -437,12 +437,12 @@
 
             },
             {data: {values: that.result.backward, format:{type: "json"}},
-            mark: {type:"text", color:"purple", "dy": {"expr": 10}},
+            mark: {type:"text", color:"purple", dy: {expr: -10}},
             encoding: {
               x: {field: "midpoint_x", type: "quantitative"},
               y: {field: "midpoint_y", type: "quantitative"},
               text: {field: "transrate", type: "quantitative"},
-              angle: {field: "slope_angle"},
+              angle: {field: "slope_angle"}
               },
 
             }
