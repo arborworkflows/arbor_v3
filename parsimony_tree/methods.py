@@ -5,6 +5,9 @@ from rpy2 import robjects
 import rpy2.robjects.numpy2ri as rpyn
 import os
 import json
+from PIL import Image
+import base64
+from io import BytesIO
 
 def testRInterface():
     r = robjects.r
@@ -145,13 +148,26 @@ dev.off()
     points_df = pd.read_csv('/tmp/points_file.csv')
     connections_json = connections_df.to_dict('records')
     points_json = points_df.to_dict('records')
-    #print(points_json)
+    result_img = Image.open('/tmp/plotfile.png')
+    print('was able to read image')
+    #pixels = result_img.load()
+
+    im_file = BytesIO()
+    result_img.save(im_file, format="JPEG")
+    print('was able to load image onto strange byte stream')
+    im_bytes = im_file.getvalue()  # im_bytes: image in binary format.
+    im_b64 = base64.b64encode(im_bytes)
+    print('we encoded to base64. hooray. almost done')
+    #print('encoded PNG:',im_b64)
+    base64_string = im_b64.decode('utf-8')
+    print('converted to string')
 
     # repack from pandas dataframe into a dictionary.
 
     result = {}
     result['points'] = points_json
     result['connections'] = connections_json
+    result['plot'] = base64_string
 
     # return the data arrays here as a JSON blob to javascript
     # for javascript to render in vegalite

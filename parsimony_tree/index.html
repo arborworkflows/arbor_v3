@@ -82,17 +82,17 @@
           </v-card>
 
         <div xs12 class="text-xs-center mb-4 ml-4 mr-4">
-          <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
+          <v-card  class="mb-4 ml-4 mr-4">
             <v-card-text>Result summary</v-card-text>
               <table id="resultTable" class="display" width="100%"></table>
           </v-card>
-          <v-card class ="mb-4 ml-4 mr-4">
+          <v-card  class ="mb-4 ml-4 mr-4">
             <v-card-text>Tree</v-card-text>
             <div ref="mp_plot"></div>
           </v-card>
-          <v-card v-if="result.length > 0" class="mb-4 ml-4 mr-4">
+          <v-card  class="mb-4 ml-4 mr-4">
             <v-card-text>Most Parsimonious Reconstruction</v-card-text>
-            <img src="/tmp/plotfile.png">
+            <!-- <img src=:id="parsimonyImage">  -->
           </v-card>
         </div>
       </v-layout>
@@ -136,6 +136,7 @@
     result: [],
     resultColumns: [],
     plotUrl: '',
+    parsimonyImage : [],
 
 
   }),
@@ -201,6 +202,7 @@
                 // Kristen: other variables here
                 that.running = false
                 that.renderTheSpec(that)
+                //that.parsimonyImage = that.printTheImage(that.result)
 
               },
               error: function(data){
@@ -211,6 +213,13 @@
               }
           });
     },
+
+    async printTheImage(result) {
+      console.log('plot:',result.plot)
+      var img = atob(result.plot)
+      return img 
+    },
+
 
 
     async uploadTable(file) {
