@@ -92,7 +92,7 @@
           </v-card>
           <v-card  class="mb-4 ml-4 mr-4">
             <v-card-text>Most Parsimonious Reconstruction</v-card-text>
-              <!--<img src="parsimonyImage"> -->
+              <img ref="parsimony_Image">
           </v-card>
         </div>
       </v-layout>
@@ -243,6 +243,9 @@
 
       that.parsimonyImage = window.URL.createObjectURL(blob);
       console.log(that.parsimonyImage)
+      // set that.$refs.parsimonyPlot to that.parsimonyImage somehow.... 
+      that.$refs.parsimony_Image.setAttribute('src', that.parsimonyImage)
+      // download the image immediately
       const link = document.createElement('a');
       link.href = that.parsimonyImage;
       link.setAttribute('download', 'parsimony_plot.jpg') //or any other extension;
