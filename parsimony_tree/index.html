@@ -92,7 +92,7 @@
           </v-card>
           <v-card  class="mb-4 ml-4 mr-4">
             <v-card-text>Most Parsimonious Reconstruction</v-card-text>
-            <!-- <img src=:id="parsimonyImage">  -->
+              <!--<img src="parsimonyImage"> -->
           </v-card>
         </div>
       </v-layout>
@@ -136,7 +136,7 @@
     result: [],
     resultColumns: [],
     plotUrl: '',
-    parsimonyImage : [],
+    parsimonyImage : '',
 
 
   }),
@@ -202,7 +202,7 @@
                 // Kristen: other variables here
                 that.running = false
                 that.renderTheSpec(that)
-                //that.parsimonyImage = that.printTheImage(that.result)
+                that.printTheImage(that)
 
               },
               error: function(data){
@@ -214,10 +214,41 @@
           });
     },
 
-    async printTheImage(result) {
-      console.log('plot:',result.plot)
-      var img = atob(result.plot)
-      return img 
+
+    
+    async printTheImage(that) {
+      console.log('plot:',that.result.plot)
+      //that.parsimonyImage = window.URL.createObjectURL(new Blob([img], {type: "image/png"}));
+      //that.parsimonyImage = window.URL.createObjectURL(new Blob([that.result.plot], {type: "image/png"}));
+
+      var b64Data = that.result.plot
+      const byteCharacters = atob(b64Data);
+      const contentType = "image/jpeg"
+      const sliceSize=512
+
+      const byteArrays = [];
+      for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+      }
+
+      const blob = new Blob(byteArrays, {type: contentType});
+
+      that.parsimonyImage = window.URL.createObjectURL(blob);
+      console.log(that.parsimonyImage)
+      const link = document.createElement('a');
+      link.href = that.parsimonyImage;
+      link.setAttribute('download', 'parsimony_plot.jpg') //or any other extension;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
 
 
