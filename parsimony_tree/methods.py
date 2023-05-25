@@ -152,6 +152,8 @@ dev.off()
     print('was able to read image')
     #pixels = result_img.load()
 
+    # In order to display the plot image, it first needs to be sent through JSON
+    # First, encode to base64
     im_file = BytesIO()
     result_img.save(im_file, format="JPEG")
     print('was able to load image onto strange byte stream')
@@ -159,6 +161,7 @@ dev.off()
     im_b64 = base64.b64encode(im_bytes)
     print('we encoded to base64. hooray. almost done')
     #print('encoded PNG:',im_b64)
+    # Then decode to a string in utf-8
     base64_string = im_b64.decode('utf-8')
     print('converted to string')
 

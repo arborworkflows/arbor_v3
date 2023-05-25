@@ -82,10 +82,6 @@
           </v-card>
 
         <div xs12 class="text-xs-center mb-4 ml-4 mr-4">
-          <v-card  class="mb-4 ml-4 mr-4">
-            <v-card-text>Result summary</v-card-text>
-              <table id="resultTable" class="display" width="100%"></table>
-          </v-card>
           <v-card  class ="mb-4 ml-4 mr-4">
             <v-card-text>Tree</v-card-text>
             <div ref="mp_plot"></div>
@@ -215,7 +211,7 @@
     },
 
 
-    
+
     async printTheImage(that) {
       console.log('plot:',that.result.plot)
       //that.parsimonyImage = window.URL.createObjectURL(new Blob([img], {type: "image/png"}));
@@ -226,6 +222,7 @@
       const contentType = "image/jpeg"
       const sliceSize=512
 
+      // Thanks to https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
       const byteArrays = [];
       for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
         const slice = byteCharacters.slice(offset, offset + sliceSize);
@@ -243,15 +240,15 @@
 
       that.parsimonyImage = window.URL.createObjectURL(blob);
       console.log(that.parsimonyImage)
-      // set that.$refs.parsimonyPlot to that.parsimonyImage somehow.... 
+      // set that.$refs.parsimonyPlot to that.parsimonyImage somehow....
       that.$refs.parsimony_Image.setAttribute('src', that.parsimonyImage)
       // download the image immediately
-      const link = document.createElement('a');
-      link.href = that.parsimonyImage;
-      link.setAttribute('download', 'parsimony_plot.jpg') //or any other extension;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      //const link = document.createElement('a');
+      //link.href = that.parsimonyImage;
+      //link.setAttribute('download', 'parsimony_plot.jpg') //or any other extension;
+      //document.body.appendChild(link);
+      //link.click();
+      //document.body.removeChild(link);
     },
 
 
