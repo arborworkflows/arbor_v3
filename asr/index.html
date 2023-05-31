@@ -37,6 +37,7 @@
                 @change="uploadTree($event.target.files[0])"
               >
             </v-flex>
+            <br>
             <v-flex xs12>
               <v-select label="Column" v-model="selColumn" :items="columns" />
             </v-flex>
@@ -96,6 +97,10 @@
              <v-card-text>ASR Plot</v-card-text>
              <div ref="asr_plot"></div>
             </v-card>
+            <v-card  class="mb-4 ml-4 mr-4">
+              <v-card-text>ASR Plot</v-card-text>
+                <img ref="asr_Image">
+            </v-card>
         </v-layout>
       </v-layout>
     </v-app>
@@ -138,6 +143,7 @@
         result: [],
         resultColumns: [],
         plotUrl: '',
+        asrImage: '',
       }),
     asyncComputed: {
       scratchFolder() {
@@ -203,6 +209,7 @@
                   that.running = false
                   //that.renderTheSpec(that)
                   that.squareTreeRender(that)
+                  that.printTheImage(that)
 
                 },
                 error: function(data){
@@ -212,6 +219,38 @@
 
                 }
             });
+      },
+
+      async printTheImage(that) {
+        console.log('plot:',that.result.plot)
+        //that.parsimonyImage = window.URL.createObjectURL(new Blob([img], {type: "image/png"}));
+        //that.parsimonyImage = window.URL.createObjectURL(new Blob([that.result.plot], {type: "image/png"}));
+
+        var b64Data = that.result.plot
+        const byteCharacters = atob(b64Data);
+        const contentType = "image/png"
+        const sliceSize=512
+
+        // Thanks to https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
+        const byteArrays = [];
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+          const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+          const byteNumbers = new Array(slice.length);
+          for (let i = 0; i < slice.length; i++) {
+            byteNumbers[i] = slice.charCodeAt(i);
+          }
+
+          const byteArray = new Uint8Array(byteNumbers);
+          byteArrays.push(byteArray);
+        }
+
+        const blob = new Blob(byteArrays, {type: contentType});
+
+        that.asrImage = window.URL.createObjectURL(blob);
+        console.log(that.asrImage)
+        // set attribute for use in the v-card at the top
+        that.$refs.asr_Image.setAttribute('src', that.asrImage)
       },
 
 

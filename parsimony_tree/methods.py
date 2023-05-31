@@ -66,7 +66,7 @@ tree_rooted <- root(tree_mp, outgroup = outgroup,
                     resolve.root = TRUE, edgelabel = TRUE)
 
 # Plot tree to png
-plotsize = 1000
+plotsize = 800
 png(plot_file, width = plotsize, height = plotsize)
 plot(tree_rooted)
 dev.off()
@@ -155,7 +155,7 @@ dev.off()
     # In order to display the plot image, it first needs to be sent through JSON
     # First, encode to base64
     im_file = BytesIO()
-    result_img.save(im_file, format="JPEG")
+    result_img.save(im_file, format="PNG")
     print('was able to load image onto strange byte stream')
     im_bytes = im_file.getvalue()  # im_bytes: image in binary format.
     im_b64 = base64.b64encode(im_bytes)

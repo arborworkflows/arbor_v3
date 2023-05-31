@@ -5,6 +5,9 @@ from rpy2 import robjects
 import rpy2.robjects.numpy2ri as rpyn
 import os
 import json
+from PIL import Image
+import base64
+from io import BytesIO
 
 def testRInterface():
     r = robjects.r
@@ -144,16 +147,34 @@ write.csv(edge_df, connect_file, row.names = FALSE)
     points_df = pd.read_csv('/tmp/points_file.csv')
     connections_json = connections_df.to_dict('records')
     points_json = points_df.to_dict('records')
+    result_img = Image.open('/tmp/plotfile.png')
+    print('was able to read image')
     #print(points_json)
+
+    # In order to display the plot image, it first needs to be sent through JSON
+    # First, encode to base64
+    im_file = BytesIO()
+    result_img.save(im_file, format="PNG")
+    print('was able to load image onto strange byte stream')
+    im_bytes = im_file.getvalue()  # im_bytes: image in binary format.
+    im_b64 = base64.b64encode(im_bytes)
+    print('we encoded to base64. hooray. almost done')
+    #print('encoded PNG:',im_b64)
+    # Then decode to a string in utf-8
+    base64_string = im_b64.decode('utf-8')
+    print('converted to string')
+
+
 
     # repack from pandas dataframe into a dictionary.
 
     result = {}
     result['points'] = points_json
     result['connections'] = connections_json
+    result['plot'] = base64_string
     # values are returned as a list of dictionaries
     result['traits'] = result_as_dict
-    result['traits_csv'] = result_as_csv 
+    result['traits_csv'] = result_as_csv
 
     #for i in result_as_dict:
     #    for key in i.keys():

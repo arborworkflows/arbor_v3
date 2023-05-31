@@ -81,7 +81,7 @@
             </v-card-text>
           </v-card>
 
-        <div xs12 class="text-xs-center mb-4 ml-4 mr-4">
+        <div xs12 class="text-xs-center mb-4 ml-4 mr-4" style="overflow-x:scroll;">
           <v-card  class ="mb-4 ml-4 mr-4">
             <v-card-text>Tree</v-card-text>
             <div ref="mp_plot"></div>
@@ -219,7 +219,7 @@
 
       var b64Data = that.result.plot
       const byteCharacters = atob(b64Data);
-      const contentType = "image/jpeg"
+      const contentType = "image/png"
       const sliceSize=512
 
       // Thanks to https://stackoverflow.com/questions/16245767/creating-a-blob-from-a-base64-string-in-javascript
@@ -322,8 +322,11 @@
 
         var spec = {
           title: "Maximum Parsimony Tree",
-          width: 1200,
-          height: 800,
+          width: 1000,
+          height: 1000,
+          autosize: {
+            type: "fit",
+          },
           layer: [
             {data: {values: that.result.points, format:{type: "json"}},
             params: [{
@@ -349,7 +352,7 @@
             }],
             mark: {type:"text", fill: "#000000", align: {expr:"datum.Node_x_coord"}, dx: {expr:10}},
             encoding: {
-              x: {field: "Node_x_coord", type: "quantitative"},
+              x: {field: "Node_x_coord", type: "quantitative", axis: {"labelLimit":0}},
               y: {field: "Node_y_coord", type: "quantitative"},
               text: {field: "Species", type: "ordinal"},
               }
@@ -375,7 +378,7 @@
           ]
           };
             //var renderOptions = (),
-            vegaEmbed(that.$refs.mp_plot, spec, {padding: 10, actions: {export: true, source: false, editor: false, compiled: false}})
+            vegaEmbed(that.$refs.mp_plot, spec, {padding: 10, actions: {export: true, source: false, editor: true, compiled: false}})
           },
 
 
