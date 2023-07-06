@@ -322,26 +322,27 @@
 
         var spec = {
           title: "Maximum Parsimony Tree",
-          width: 1000,
-          height: 1000,
-          autosize: {
-            type: "fit",
-          },
+          width: 1100,
+          height: 1100,
           layer: [
             {data: {values: that.result.points, format:{type: "json"}},
             params: [{
               name: "grid",
               select: "interval",
-              bind: "scales"
+              bind: "scales",
             }],
             mark: {type:"point", fill: "#4C78A8", tooltip: {content: "data"}},
             encoding: {
               x: {field: "Node_x_coord", type: "quantitative",
-              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
-              title: null},
+              axis: {labelFontSize:0,domain: null, axisColor: null, grid: false, ticks: false},
+              title: ' ',
+              scale: {"domain": [-1, 10]},
+            },
               y: {field: "Node_y_coord", type: "quantitative",
-              axis: {labelFontSize:0,domain: false, axisColor: null, grid: false, ticks: false},
-              title: null},
+              axis: {labelFontSize:0,domain: null, axisColor: null, grid: false, ticks: false},
+              title: ' ',
+              scale: {"domain": [-1,10]},
+            },
               }
             },
             {data: {values: that.result.points, format:{type: "json"}},
